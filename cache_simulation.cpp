@@ -139,7 +139,7 @@ int add_addr_list(struct cache_sim* cache, _u32 * addr)
 
         return 0;
 }
-
+// 这函数也不用写，用库函数就行。
 int get_power_num(int num)
 {
         int ret = -1;
@@ -255,7 +255,7 @@ static int get_cache_free_item(struct cache_sim* cache,  _u32 group_base, void* 
          */
         return free_index;
 }
-//写入cache？
+//写入cache
 static void set_cache_item(struct cache_sim* cache, _u32 index, void* addr)
 {
         struct cache_item* item = cache->caches + index;
