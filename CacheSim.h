@@ -25,8 +25,9 @@ enum cache_swap_style {
 };
 
 //写内存方法就默认写回吧。
-class Cache_Item {
+class Cache_Line {
     _u32 tag;
+    /**计数，记录上一次访问的时间*/
     union {
         _u32 count;
         _u32 lru_count;
@@ -42,14 +43,14 @@ class CacheSim {
     _u32 cache_line_size;
     /**总的行数*/
     _u32 cache_line_num;
-    /**cache way的数量，总数*/
+    /**每个set有多少way*/
     _u32 cache_mapping_ways;
-    /**一个caceh set内含有的way（line）数量，即几路组相连*/
+    /**整个cache有多少组*/
     _u32 cache_set_size;
     /**2的多少次方是set的数量，用于匹配地址时，进行位移比较*/
     _u32 cache_set_shifts;
     /**2的多少次方是line的长度，用于匹配地址*/
-    _u32 caceh_line_shifts;
+    _u32 cache_line_shifts;
     /**获取出tag部分，主要是通过和1与*/
     _u32 cache_tag_mask;
     /**真正的cache地址列*/

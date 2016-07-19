@@ -224,6 +224,8 @@ static int get_cache_free_item(struct cache_sim* cache,  _u32 group_base, void* 
         if (CACHE_SWAP_RAND == cache->swap_style){
                 free_index = rand() % cache->cache_group_size;
         } else {
+            // 这里原作者将FIFO和LRU都执行这个流程的，但是实际上，这里执行的是一个错误的算法。既不是FIFO，也不是LRU
+            //warning: this is a wrong method.
                 min_count = cache->caches[group_base].count;
                 for (i=0; i<cache->cache_group_size; i++) {
                         if (cache->caches[group_base + i].count < min_count){
@@ -263,6 +265,7 @@ static void set_cache_item(struct cache_sim* cache, _u32 index, void* addr)
         item->buf = cache->cache_buf + cache->cache_line_size * index;
         item->tag = (_u32)addr & ~CACHE_FLAG_MASK;
         item->tag |= CACHE_FLAG_VALID;
+    // 设置上一次的访问时间
         item->count = cache->tick_count;
 }
 //对一个cache指令进行分析
@@ -368,7 +371,7 @@ void load_trace(struct cache_sim* cache, char* filename)
                         do_cache_op(cache, &addr, 0);
                         wcount++;
                 }
-
+                //在这里加上tick的计数
                 cache->tick_count += instruct_deltha + 1;
         }
 
