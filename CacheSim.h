@@ -45,6 +45,8 @@ class CacheSim {
     _u32 cache_line_num;
     /**每个set有多少way*/
     _u32 cache_mapping_ways;
+    /**组内块号的位移*/
+    _u32 cache_mapping_ways_shifts;
     /**整个cache有多少组*/
     _u32 cache_set_size;
     /**2的多少次方是set的数量，用于匹配地址时，进行位移比较*/

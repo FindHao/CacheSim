@@ -1,8 +1,8 @@
 //
 // Created by find on 16-7-19.
 // Cache architect
-// |  tag  |  which way this addr mapping in set | which bytes in your line size |
-// |tag|set|way|
+// memory address  format:
+// |tag|组号|组内块号log2()|块内地址 log2(cache line)|
 //
 #include "CacheSim.h"
 
@@ -74,14 +74,21 @@ void CacheSim::set_cache_line(CacheSim *cache, _u32 index, _u32 addr) {
     line->tag |= CACHE_FLAG_VAILD;
     line->count = cache->tick_count;
 }
-
+/**这里是真正操作地址的函数，原作者的代码写错了，内存地址的划分都没有明确了解。
+ * 内存地址划分格式应该如下：
+ * |tag|组号（属于哪一个set）|组内块号log2(cache_mapping_ways)|块内地址log2(cache_line_size)|
+ * 所以，应该先获得当前地址属于哪一个set，在check的时候，对这个set的line进行验证。
+ * */
 void CacheSim::do_cache_op(CacheSim *cache, _u32 addr, bool is_read) {
     _u32 set,set_base;
     int index;
-    // 去掉最后的标识line中哪个字节数据的位，
-    //？？？ 这里应该是获得的一个set里的哪个way啊。奇怪
-    // 应该是先获取哪个set然后对这个set进行循环对比。check hit or miss.
-    set = (addr >> cache->cache_line_shifts) % cache->cache_mapping_ways;
-    //
-    set_base = set * cache->cache_set_size;
+    // TODO: add the init of cache_mapping_ways_shifts
+    set = (addr >> (cache->cache_line_shifts + cache->cache_mapping_ways_shifts)) % cache->cache_set_size;
+    //获得组号的基地址
+    set_base = set * cache->cache_mapping_ways;
+    // 命中情况
+    index = check_cache_hit(cache, set_base, addr);
+    if(index >= 0){
+        
+    }
 }
