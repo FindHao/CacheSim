@@ -81,7 +81,7 @@ struct cache_sim {
 };
 
 /* 返回插入位置 */
-int get_addr_index(struct cache_sim* cache, void* addr)
+int get_addr_index(struct cache_sim* cache, _u32 * addr)
 {
         int lo = 0;
         int hi = cache->addr_num - 1;
@@ -89,16 +89,16 @@ int get_addr_index(struct cache_sim* cache, void* addr)
 
         if (cache->addr_num < 1)
                 return -1;
-        if ((_u32)addr <= cache->addr_list[lo])
+        if (*addr <= cache->addr_list[lo])
                 return lo;
-        if ((_u32)addr >= cache->addr_list[hi])
+        if (*addr >= cache->addr_list[hi])
                 return hi;
 
         while (hi > lo + 1) {
                 mid = (lo + hi) / 2;
-                if ((_u32)addr > cache->addr_list[mid])
+                if (*addr > cache->addr_list[mid])
                         lo = mid;
-                else if ((_u32)addr < cache->addr_list[mid])
+                else if (*addr < cache->addr_list[mid])
                         hi = mid;
                 else
                         return mid;
@@ -107,34 +107,34 @@ int get_addr_index(struct cache_sim* cache, void* addr)
         return mid;
 }
 
-int add_addr_list(struct cache_sim* cache, void* addr)
+int add_addr_list(struct cache_sim* cache, _u32 * addr)
 {
         int index;
 
         if (!cache->addr_list || cache->addr_num < 1
                 || cache->addr_num >= cache->addr_list_size) {
                 cache->addr_list_size += 0x400;
-                cache->addr_list = realloc(cache->addr_list, cache->addr_list_size * sizeof(_u32));
+                cache->addr_list = (_u32 *) realloc(cache->addr_list, cache->addr_list_size * sizeof(_u32));
         }
 
         if (cache->addr_num < 1) {
-                cache->addr_list[0] = (_u32)addr;
+                cache->addr_list[0] = *addr;
                 cache->addr_num = 1;
                 return 0;
         }
 
         index = get_addr_index(cache, addr);
 
-        if ((_u32)addr == cache->addr_list[index])
+        if (*addr == cache->addr_list[index])
                 return -1;
-        else if ((_u32)addr > cache->addr_list[index])
+        else if (*addr > cache->addr_list[index])
                 index += 1;
 
         memmove(cache->addr_list + index + 1,
                 cache->addr_list + index,
                 sizeof(_u32)*(cache->addr_num - index));
 
-        cache->addr_list[index] = (_u32)addr;
+        cache->addr_list[index] = *addr;
         cache->addr_num++;
 
         return 0;
@@ -176,7 +176,7 @@ void reset_cache_sim(struct cache_sim* cache, int cache_line_size, int mapping_w
         cache->tick_count = 0;
         //这个buf是用来干什么的？？
         if (!cache->cache_buf){
-                cache->cache_buf = malloc(cache->cache_size);
+                cache->cache_buf = (_u8 *)malloc(cache->cache_size);
                 memset(cache->cache_buf, 0, cache->cache_size);
         }
 
@@ -186,11 +186,11 @@ void reset_cache_sim(struct cache_sim* cache, int cache_line_size, int mapping_w
         }
 
         /* 这里直接设置cache-tags为32bits-简化 */
-        cache->caches = malloc(sizeof(struct cache_item) * cache->cache_item_num);
+        cache->caches = (cache_item *) malloc(sizeof(struct cache_item) * cache->cache_item_num);
         memset(cache->caches, 0, sizeof(struct cache_item) * cache->cache_item_num);
 }
 //判断是否命中
-static int chk_cache_hit(struct cache_sim* cache, _u32 group_base, void* addr)
+static int chk_cache_hit(struct cache_sim* cache, _u32 group_base, _u32 *addr)
 {
         _u32 i, tag;
         for (i=0; i<cache->cache_group_size; i++) {
@@ -198,7 +198,7 @@ static int chk_cache_hit(struct cache_sim* cache, _u32 group_base, void* addr)
                 tag = cache->caches[group_base + i].tag;
                 // 判断：是否有效，当前tag
                 if ((tag & CACHE_FLAG_VALID)
-                        && (tag & cache->cache_tag_mask) == ((_u32)addr & cache->cache_tag_mask)){
+                        && (tag & cache->cache_tag_mask) == (* addr & cache->cache_tag_mask)){
                         return group_base + i;
                 }
         }
@@ -266,7 +266,7 @@ static void set_cache_item(struct cache_sim* cache, _u32 index, void* addr)
         item->count = cache->tick_count;
 }
 //对一个cache指令进行分析
-static int do_cache_op(struct cache_sim* cache, void* addr, int is_read)
+static int do_cache_op(struct cache_sim* cache, _u32 * addr, int is_read)
 {
         _u32 group;
         _u32 group_base;
@@ -346,6 +346,7 @@ void free_cache_sim(struct cache_sim* cache)
 void load_trace(struct cache_sim* cache, char* filename)
 {
         char buf[128];
+        filename = strcat(filename, "/home/find/ddown/traces");
         FILE* fp = fopen(filename, "r");
         _u32 rcount = 0, wcount = 0;
 
@@ -361,10 +362,10 @@ void load_trace(struct cache_sim* cache, char* filename)
                 sscanf(buf, "%c %x %d", &style, &addr, &instruct_deltha);
                 //add_addr_list(cache, (void*)addr);
                 if (style == 'l'){
-                        do_cache_op(cache, (void*)addr, 1);
+                        do_cache_op(cache, &addr, 1);
                         rcount++;
                 } else {
-                        do_cache_op(cache, (void*)addr, 0);
+                        do_cache_op(cache, &addr, 0);
                         wcount++;
                 }
 
@@ -411,7 +412,7 @@ void load_trace(struct cache_sim* cache, char* filename)
         fclose(fp);
 }
 //不同cache line大小和路数的不同配置
-static do_test(struct cache_sim* cache, char* filename)
+void do_test(struct cache_sim* cache, char* filename)
 {
         int line_size[] = {32, 64, 128};
         int ways[] = {1, 2, 4, 8};
