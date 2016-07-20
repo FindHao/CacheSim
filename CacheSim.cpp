@@ -77,9 +77,9 @@ int CacheSim::check_cache_hit(_u32 set_base, _u32 addr) {
     }
     return -1;
 }
-
+/**获取当前set中可用的line，如果没有，就找到要被替换的块*/
 int CacheSim::get_cache_free_line(_u32 set_base, _u32 addr) {
-    _u32 i, tag;
+    _u32 i, tag, min_count;
     // TODO: min_count??
     _u32 free_index;
     /**从当前cache set里找可用的空闲line，可用：脏数据，空闲数据
@@ -99,17 +99,16 @@ int CacheSim::get_cache_free_line(_u32 set_base, _u32 addr) {
      * FIFO：这个原作者的实现是正确的，是我理解错他的意思了。
      * */
     free_index = 0;
-    switch (this->swap_style) {
-        case CACHE_SWAP_RAND:
-            free_index = rand() % this->cache_set_size;
-            break;
-            //TODO: 后续再补充这俩算法吧。
-        case CACHE_SWAP_FIFO:
-
-            break;
-            // TODO
-        case CACHE_SWAP_LRU:
-            break;
+    if(this->swap_style == CACHE_SWAP_RAND){
+        free_index = rand() % this->cache_set_size;
+    }else{
+        min_count = this->caches[set_base].count;
+        for (int j = 1; j < this->cache_mapping_ways; ++j) {
+            if(this->caches[set_base + j].count < min_count ){
+                min_count = caches[set_base + j].count;
+                free_index = j;
+            }
+        }
     }
     free_index += set_base;
     //如果原有的cache line是脏数据，写回内存
@@ -148,7 +147,7 @@ void CacheSim::do_cache_op(_u32 addr, bool is_read) {
     //命中了
     if (index >= 0) {
         this->cache_hit_count++;
-        //只有在LRU的时候才更新时间戳，所以
+        //只有在LRU的时候才更新时间戳
         if (CACHE_SWAP_LRU == this->swap_style)
             this->caches[index].lru_count = this->tick_count;
         //直接默认配置为写回法，即要替换或者数据脏了的时候才写回。
@@ -168,13 +167,6 @@ void CacheSim::do_cache_op(_u32 addr, bool is_read) {
         this->cache_miss_count++;
     }
 }
-
-//void CacheSim::free_cache_sim() {
-//    if (this->cache_buf)
-//        free(this->cache_buf);
-//    if (this->caches)
-//        free(this->caches);
-//}
 
 /**从文件读取trace，在我最后的修改目标里，为了适配项目，这里需要改掉*/
 void CacheSim::load_trace(char *filename) {
@@ -236,40 +228,5 @@ void CacheSim::load_trace(char *filename) {
 //        }
 //    }
 //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

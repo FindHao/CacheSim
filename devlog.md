@@ -25,5 +25,25 @@ fuckkkkk,,
 构造函数可以替代初始化代码
 析构函数替代自己写的free函数。
 先设置默认组相联数为4,cache line大小为32.
+基本完成，测试不同line size以及组相联数对命中率等的影响。
+还有LRU和FIFO的完善。。
 
 
+FIFO:采用那个count计数。先进先出，即找到tick count最小的line，作为替换line
+LRU：priority_quque，每个set维护一个queue，决定替换哪个line，也就是queue的数量是set的数量，而每个set里元素的个数是mapping ways。
+
+
+**TODOList**
+
++ ~~FIFO替换算法~~
++ ~~LRU替换算法~~
++ tick_count会不会超出int？？
++ 确认union的fifo count和LRU count等
+
+LRU的关键是要记得更新优先级队列。何时更新？有更改的时候就更新？？？
+需要用优先级队列吗？？
+![](http://my.csdn.net/uploads/201205/24/1337859321_3597.png)
+需要吗？
+现在的实现是直接分配了
+**直接从记录里找最远访问的那个line，即count比较小的那个。和FIFO的不同是，再次访问的时候，FIFO的时间戳不能更新。**
+原作者的实现并没有错误，，是我傻逼。。

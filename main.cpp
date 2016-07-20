@@ -12,6 +12,7 @@ int main() {
 //        cache->swap_style = k;
 //
 //    }
+
     cache.load_trace(test_case);
 
     return 0;
