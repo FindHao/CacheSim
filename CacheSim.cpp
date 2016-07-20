@@ -16,19 +16,19 @@ CacheSim::CacheSim(int cache_size,int cache_line_size, int mapping_ways) {
     if (cache_line_size < 0 || mapping_ways < 1) {
         return;
     }
-    this->cache_line_size = cache_line_size;
+    this->cache_line_size = (_u32) cache_line_size;
     // 总的line数 = cache总大小/ 每个line的大小（一般64byte，模拟的时候可配置）
     this->cache_line_num = this->cache_size / cache_line_size;
     // 地址格式中的第三部分，获取设置的几路组相联，是2的多少次方，以便对地址进行位移，获取tag等。
-    this->cache_mapping_ways_shifts = log2(mapping_ways);
+    this->cache_mapping_ways_shifts = (_u32) log2(mapping_ways);
     // 地址格式中的第四部分，
-    this->cache_line_shifts = log2(cache_line_size);
+    this->cache_line_shifts = (_u32) log2(cache_line_size);
     // 几路组相联
-    this->cache_mapping_ways = mapping_ways;
+    this->cache_mapping_ways = (_u32) mapping_ways;
     // 总共有多少set
     this->cache_set_size = this->cache_line_num / mapping_ways;
     // 其二进制占用位数，同其他shifts
-    this->cache_set_shifts = log2(this->cache_set_size);
+    this->cache_set_shifts = (_u32) log2(this->cache_set_size);
     // 获取用来提取tag位的mask，比如0b1011 & 0b1100(0xB) = 0b(1000)
     this->cache_tag_mask =
             0xffffffff << (this->cache_set_shifts + this->cache_line_shifts + this->cache_mapping_ways_shifts);
@@ -41,22 +41,11 @@ CacheSim::CacheSim(int cache_size,int cache_line_size, int mapping_ways) {
     this->cache_w_count = 0;
     // 指令数，主要用来在替换策略的时候提供比较的key，在命中或者miss的时候，相应line会更新自己的count为当时的tick_count;
     this->tick_count = 0;
-    //这个buf用来模拟存数
-//    if(!this->cache_buf){
-//        this->cache_buf = (_u8*) malloc(this->cache_size);
-//        memset(this->cache_buf, 0 , this->cache_size);
-//    }
-//    if(this->caches){
-//        free(this->caches);
-//        this->caches = NULL;
-//    }
     this->cache_buf = (_u8*) malloc(this->cache_size);
     memset(this->cache_buf, 0 , this->cache_size);
     // 为每一行分配空间
     this->caches = (Cache_Line*)malloc(sizeof(Cache_Line) * this->cache_line_num);
     memset(this->caches, 0, sizeof(Cache_Line) * this->cache_line_num);
-
-
 
     //测试时的默认配置
     this->swap_style = CACHE_SWAP_RAND;
@@ -216,17 +205,6 @@ void CacheSim::load_trace(char *filename) {
 
 }
 
-//void CacheSim::do_test(char *filename) {
-//    int line_size[] = {32, 64, 128};
-//    int ways[] = {1, 2, 4, 8, 12, 16};
-//    int i,j;
-//
-//    for (i=0; i<sizeof(line_size)/sizeof(int); i++){
-//        for (j=0; j<sizeof(ways)/sizeof(int); j++){
-//            reset_cache_sim(line_size[i], ways[j]);
-//            load_trace(filename);
-//        }
-//    }
-//}
-
-
+void CacheSim::set_swap_style(int swap_style) {
+    this->swap_style = swap_style;
+}

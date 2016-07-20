@@ -76,6 +76,8 @@ public:
 
     CacheSim(int cache_size,int cache_line_size, int mapping_ways);
     ~CacheSim();
+
+    void set_swap_style(int swap_style);
     /**原代码中addr的处理有些问题，导致我没有成功运行他的代码。
      * 检查是否命中
      * @args:
