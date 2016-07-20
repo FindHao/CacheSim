@@ -203,6 +203,23 @@ void CacheSim::load_trace(char *filename) {
         this->tick_count ++;
     }
     //TODO 添加printf打印测试结果。
+    // 指令统计
+    printf("all r/w/sum: %d %d %d \nread rate: %f%%\twrite rate: %f%%\n",
+    rcount,wcount,this->tick_count,
+           100.0*rcount/this->tick_count,
+           100.0*wcount/this->tick_count
+    );
+    // miss率
+    printf("miss/hit: %d/%d\t hit rate: %f%%/%f%%\n",
+    this->cache_miss_count,this->cache_hit_count,
+    100.0*this->cache_hit_count/(this->cache_hit_count+this->cache_miss_count),
+    100.0*this->cache_miss_count/(this->cache_miss_count+this->cache_hit_count));
+    // 读写通信
+    printf("read : %d Bytes \t %dKB\n write : %d Bytes\t %dKB \n",
+    this->cache_r_count*this->cache_line_size,
+    (this->cache_r_count*this->cache_line_size)>>10,
+   this->cache_w_count*this->cache_line_size,
+   (this->cache_w_count*this->cache_line_size)>>10);
     fclose(fin);
 
 }
