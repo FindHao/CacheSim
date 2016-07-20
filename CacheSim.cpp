@@ -16,6 +16,7 @@ CacheSim::CacheSim(int cache_size,int cache_line_size, int mapping_ways) {
     if (cache_line_size < 0 || mapping_ways < 1) {
         return;
     }
+    this->cache_size = cache_size;
     this->cache_line_size = (_u32) cache_line_size;
     // 总的line数 = cache总大小/ 每个line的大小（一般64byte，模拟的时候可配置）
     this->cache_line_num = this->cache_size / cache_line_size;
@@ -161,10 +162,10 @@ void CacheSim::do_cache_op(_u32 addr, bool is_read) {
 void CacheSim::load_trace(char *filename) {
     char buf[128];
     // 添加自己的input路径
-    FILE* fin = fopen(filename, "r");
+    FILE* fin ;
     // 记录的是trace中指令的读写，由于cache机制，和真正的读写次数当然不一样。。主要是如果设置的写回法，则写会等在cache中，直到被替换。
     _u32 rcount = 0, wcount =0;
-
+    fin = fopen(filename, "r");
     if(!fin){
         printf("load_trace %s failed\n", filename);
         return;
