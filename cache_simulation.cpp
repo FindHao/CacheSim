@@ -224,8 +224,6 @@ static int get_cache_free_item(struct cache_sim* cache,  _u32 group_base, void* 
         if (CACHE_SWAP_RAND == cache->swap_style){
                 free_index = rand() % cache->cache_group_size;
         } else {
-            // 这里原作者将FIFO和LRU都执行这个流程的，但是实际上，这里执行的是一个错误的算法。既不是FIFO，也不是LRU
-            //warning: this is a wrong method.
                 min_count = cache->caches[group_base].count;
                 for (i=0; i<cache->cache_group_size; i++) {
                         if (cache->caches[group_base + i].count < min_count){
@@ -288,6 +286,7 @@ static int do_cache_op(struct cache_sim* cache, _u32 * addr, int is_read)
                         cache->caches[index].lru_count = cache->tick_count;
                 if (!is_read && cache->write_style == CACHE_WRITE_THROUGH)
                         cache->cache_w_count++;
+            //这里只是标记了个写啊？？但是没有真的操作写回啊。
                 if (!is_read && cache->write_style == CACHE_WRITE_BACK)
                         cache->caches[index].tag |= CACHE_FLAG_WRITE_BACK;
         } else {

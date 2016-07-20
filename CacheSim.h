@@ -26,6 +26,7 @@ enum cache_swap_style {
 
 //写内存方法就默认写回吧。
 class Cache_Line {
+public:
     _u32 tag;
     /**计数，记录上一次访问的时间*/
     union {
@@ -56,7 +57,7 @@ class CacheSim {
     /**获取出tag部分，主要是通过和1与*/
     _u32 cache_tag_mask;
     /**真正的cache地址列*/
-    Cache_Item *caches;
+    Cache_Line *caches;
 
     /**指令计数器*/
     _u32 tick_count;
@@ -86,7 +87,7 @@ class CacheSim {
     /**找到合适的line之后，将数据写入cache line中*/
     void set_cache_line(CacheSim * cache, _u32 index, _u32 addr);
     /**对一个指令进行分析*/
-    int do_cache_op(CacheSim * cache, _u32 addr, bool is_read);
+    void do_cache_op(CacheSim * cache, _u32 addr, bool is_read);
     CacheSim * init_cache_sim(int cache_size);
     void free_cache_sim(CacheSim * cache);
     /**读入trace文件*/
