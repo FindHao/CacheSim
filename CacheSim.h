@@ -38,6 +38,8 @@ public:
 };
 
 class CacheSim {
+    // 隐患
+public:
     /**cache的总大小，单位byte*/
     _u32 cache_size;
     /**cache line(Cache block)cache块的大小*/
@@ -69,11 +71,12 @@ class CacheSim {
     _u32 cache_r_count, cache_w_count;
     /**cache hit和miss的计数*/
     _u32 cache_hit_count, cache_miss_count;
-
     /**空闲cache line的index记录，在寻找时，返回空闲line的index*/
     _u32 cache_free_num;
 
-    void reset_cache_sim(CacheSim* cache, int cache_line_size, int mapping_ways);
+    CacheSim();
+    ~CacheSim();
+    void reset_cache_sim(int cache_line_size, int mapping_ways);
     /**原代码中addr的处理有些问题，导致我没有成功运行他的代码。
      * 检查是否命中
      * @args:
@@ -81,18 +84,18 @@ class CacheSim {
      * set_base: 当前地址属于哪一个set，其基址是什么。
      * addr: 要判断的内存地址
      * TODO: check the addr */
-    int check_cache_hit(CacheSim * cache, _u32 set_base, _u32 addr);
+    int check_cache_hit(_u32 set_base, _u32 addr);
     /**获取cache当前set中空余的line*/
-    int get_cache_free_line(CacheSim *cache, _u32 set_base, _u32 addr);
+    int get_cache_free_line(_u32 set_base, _u32 addr);
     /**找到合适的line之后，将数据写入cache line中*/
-    void set_cache_line(CacheSim * cache, _u32 index, _u32 addr);
+    void set_cache_line(_u32 index, _u32 addr);
     /**对一个指令进行分析*/
-    void do_cache_op(CacheSim * cache, _u32 addr, bool is_read);
-    CacheSim * init_cache_sim(int cache_size);
-    void free_cache_sim(CacheSim * cache);
+    void do_cache_op(_u32 addr, bool is_read);
+    void init_cache_sim(int cache_size);
+    void free_cache_sim();
     /**读入trace文件*/
-    void load_trace(CacheSim * cache, char * filename);
-    void do_test(CacheSim * cache, char * filename);
+    void load_trace(char * filename);
+    void do_test(char * filename);
 };
 
 #endif

@@ -261,7 +261,7 @@ static void set_cache_item(struct cache_sim* cache, _u32 index, void* addr)
         struct cache_item* item = cache->caches + index;
 
         item->buf = cache->cache_buf + cache->cache_line_size * index;
-        item->tag = (_u32)addr & ~CACHE_FLAG_MASK;
+        item->tag = addr & ~CACHE_FLAG_MASK;
         item->tag |= CACHE_FLAG_VALID;
     // 设置上一次的访问时间
         item->count = cache->tick_count;
@@ -359,6 +359,7 @@ void load_trace(struct cache_sim* cache, char* filename)
 
         while (fgets(buf, sizeof(buf), fp)){
                 _u8 style = 0;
+            //采用32位无符号的十六进制表示；存储器访问指令之间的间隔指令数。例如第5条指令和第10条指令为存储器访问指令，且中间没有其他存储器访问指令，则间隔指令数为4。instruct_deltha
                 _u32 addr = 0, instruct_deltha = 0;
                 //printf("%d %s", cache->addr_num, buf);
                 sscanf(buf, "%c %x %d", &style, &addr, &instruct_deltha);
@@ -366,6 +367,7 @@ void load_trace(struct cache_sim* cache, char* filename)
                 if (style == 'l'){
                         do_cache_op(cache, &addr, 1);
                         rcount++;
+                    //文件里是l和s。。s在测试数据里代表write。。。
                 } else {
                         do_cache_op(cache, &addr, 0);
                         wcount++;
