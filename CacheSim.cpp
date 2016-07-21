@@ -9,7 +9,7 @@
 #include <cstring>
 #include <math.h>
 #include <cstdio>
-
+#include <time.h>
 
 CacheSim::CacheSim(int cache_size,int cache_line_size, int mapping_ways) {
 //如果输入配置不符合要求
@@ -50,6 +50,9 @@ CacheSim::CacheSim(int cache_size,int cache_line_size, int mapping_ways) {
 
     //测试时的默认配置
     this->swap_style = CACHE_SWAP_RAND;
+
+
+    srand((unsigned)time(NULL));
 }
 
 CacheSim::~CacheSim(){
@@ -90,7 +93,7 @@ int CacheSim::get_cache_free_line(_u32 set_base, _u32 addr) {
      * */
     free_index = 0;
     if(this->swap_style == CACHE_SWAP_RAND){
-        free_index = rand() % this->cache_set_size;
+        free_index = rand() % this->cache_mapping_ways;
     }else{
         min_count = this->caches[set_base].count;
         for (int j = 1; j < this->cache_mapping_ways; ++j) {

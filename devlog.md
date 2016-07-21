@@ -53,3 +53,28 @@ LRU的关键是要记得更新优先级队列。何时更新？有更改的时�
 按照我的思路，每次new一个cachesim，但是貌似代码执行出来，每次都是同一个地址啊。不过由于有delete操作，所以每次都在那个虚拟地址上分配？？？
 那么为什么在fgets那里会出现段错误？？
 无奈，只好一个一个测试了。。
+bug找到
+```
+    if(this->swap_style == CACHE_SWAP_RAND){
+        free_index = rand() % this->cache_mapping_ways;
+```
+随机替换算法，% 的应该是mapping ways。。
+
+影响因素：
+line size， ways， 替换算法。
+要做的比较（折线图）
+
+||ways1|ways2|
+|-|-|-|
+|line size 64|fdfdfd|fdfd
+
+主要看在这些元素变化的时候，miss率和读写数量的变化。
+## July 21, 2016 9:03 AM
+
+|变量|固定值|实验结果|Q|
+|-|-|-|-|
+|mapping ways|替换策略 cache_line_size|随着mapping ways的增加，miss率降低，但是降低的幅度逐渐下降|设置更大的mapping ways，查看后面的图像走势|
+|替换策略|mapping_ways cache_line_size|不同替换策略的miss rate差距不大，FIFO 0.245306, LRU 0.238325, RAND0.241427，写数据FIFO最高，LRU和RAND相同，读数据FIFO和RAND相同，LRU最低。||
+
+
+
