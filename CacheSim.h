@@ -12,10 +12,14 @@ typedef unsigned int _u32;
  * 0x2: 脏位
  * 0x4: 是否上锁*/
 // .... define不能加;忘了。。
-#define CACHE_FLAG_VAILD 0x1
-#define CACHE_FLAG_WRITE_BACK 0x2
-#define CACHE_FLAG_LOCK 0x4
-#define CACHE_FLAG_MASK 0xf
+//#define CACHE_FLAG_VAILD 0x01
+//#define CACHE_FLAG_DIRTY 0x02
+//#define CACHE_FLAG_LOCK 0x04
+//#define CACHE_FLAG_MASK 0xff
+const unsigned char CACHE_FLAG_VAILD = 0x01;
+const unsigned char CACHE_FLAG_DIRTY = 0x02;
+const unsigned char CACHE_FLAG_LOCK = 0x04;
+const unsigned char CACHE_FLAG_MASK = 0xff;
 // 替换算法
 enum cache_swap_style {
     CACHE_SWAP_FIFO,
@@ -28,12 +32,13 @@ enum cache_swap_style {
 class Cache_Line {
 public:
     _u32 tag;
-    /**计数，记录上一次访问的时间*/
+    /**计数，FIFO里记录最一开始的访问时间，LRU里记录上一次访问的时间*/
     union {
         _u32 count;
         _u32 lru_count;
         _u32 fifo_count;
     };
+    _u8 flag;
     _u8 *buf;
 };
 
@@ -48,16 +53,12 @@ public:
     _u32 cache_line_num;
     /**每个set有多少way*/
     _u32 cache_mapping_ways;
-    /**组内块号的位移*/
-    _u32 cache_mapping_ways_shifts;
     /**整个cache有多少组*/
     _u32 cache_set_size;
     /**2的多少次方是set的数量，用于匹配地址时，进行位移比较*/
     _u32 cache_set_shifts;
     /**2的多少次方是line的长度，用于匹配地址*/
     _u32 cache_line_shifts;
-    /**获取出tag部分，主要是通过和1与*/
-    _u32 cache_tag_mask;
     /**真正的cache地址列*/
     Cache_Line *caches;
 
@@ -87,7 +88,7 @@ public:
      * TODO: check the addr */
     int check_cache_hit(_u32 set_base, _u32 addr);
     /**获取cache当前set中空余的line*/
-    int get_cache_free_line(_u32 set_base, _u32 addr);
+    _u32 get_cache_free_line(_u32 set_base);
     /**找到合适的line之后，将数据写入cache line中*/
     void set_cache_line(_u32 index, _u32 addr);
     /**对一个指令进行分析*/

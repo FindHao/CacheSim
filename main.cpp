@@ -10,7 +10,6 @@ int main() {
     int ways[] = {1, 2, 4, 8, 12, 16};
     int i,j;
     CacheSim *cache;
-    int k = 0;
     for (i=0; i<sizeof(line_size)/sizeof(int); i++){
         for (j=0; j<sizeof(ways)/sizeof(int); j++){
             for (int k = CACHE_SWAP_FIFO; k < CACHE_SWAP_MAX; ++k) {
