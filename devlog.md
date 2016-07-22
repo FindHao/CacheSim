@@ -74,7 +74,24 @@ line size， ways， 替换算法。
 |变量|固定值|实验结果|Q|
 |-|-|-|-|
 |mapping ways|替换策略 cache_line_size|随着mapping ways的增加，miss率降低，但是降低的幅度逐渐下降|设置更大的mapping ways，查看后面的图像走势|
-|替换策略|mapping_ways cache_line_size|不同替换策略的miss rate差距不大，FIFO 0.245306, LRU 0.238325, RAND0.241427，写数据FIFO最高，LRU和RAND相同，读数据FIFO和RAND相同，LRU最低。||
+|替换策略|mapping_ways cache_line_size|不同替换策略的miss rate差距不大，FIFO 0.245306, LRU 0.238325, RAND0.241427，写数据FIFO最高，LRU和RAND差距非常小，读数据FIFO和RAND差距非常小，LRU最低||
+|cache_line_size|替换策略，mapping_ways|cache_line_size 越大，miss率越低|同Q1什么时候变平缓？|
+
+数据基本符合预期。
+
+## July 21, 2016 3:28 PM
+~~tag的设置应该是在set line的时候，而且应该是右移，~~
+tag_mask在一开始就是u32的，并没有右移，而是通过设置后面位为0达到目的。不对，就是应该右移。
+fuck....
+## July 22, 2016 12:35 PM
+的确想错了，tag的划分：
+```
+|tag|组号 log2(组数)|块内地址 log2(cache line)|
+```
+肯定没有组内块号，不然还要替换算法干啥。。。
+
+
+
 
 
 

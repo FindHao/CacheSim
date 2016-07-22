@@ -3,379 +3,379 @@
 line_size: 32	 mapping ways 1 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 8950/506733	 hit rate: 98.264438%/1.735562%
-read : 126176 Bytes 	 123KB
- write : 318880 Bytes	 311KB 
+miss/hit: 497673/18010	 hit rate: 3.492456%/96.507544%
+read : 9718592 Bytes 	 9490KB
+ write : 6319168 Bytes	 6171KB 
 
 line_size: 32	 mapping ways 1 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 8950/506733	 hit rate: 98.264438%/1.735562%
-read : 126176 Bytes 	 123KB
- write : 318880 Bytes	 311KB 
+miss/hit: 497673/18010	 hit rate: 3.492456%/96.507544%
+read : 9718592 Bytes 	 9490KB
+ write : 6319168 Bytes	 6171KB 
 
 line_size: 32	 mapping ways 1 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 8950/506733	 hit rate: 98.264438%/1.735562%
-read : 126176 Bytes 	 123KB
- write : 318880 Bytes	 311KB 
+miss/hit: 497673/18010	 hit rate: 3.492456%/96.507544%
+read : 9718592 Bytes 	 9490KB
+ write : 6319168 Bytes	 6171KB 
 
 line_size: 32	 mapping ways 2 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 3931/511752	 hit rate: 99.237710%/0.762290%
-read : 46528 Bytes 	 45KB
- write : 145568 Bytes	 142KB 
+miss/hit: 497430/18253	 hit rate: 3.539578%/96.460422%
+read : 9713536 Bytes 	 9485KB
+ write : 6316256 Bytes	 6168KB 
 
 line_size: 32	 mapping ways 2 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 3769/511914	 hit rate: 99.269125%/0.730875%
-read : 42048 Bytes 	 41KB
- write : 142272 Bytes	 138KB 
+miss/hit: 497409/18274	 hit rate: 3.543650%/96.456350%
+read : 9712864 Bytes 	 9485KB
+ write : 6316256 Bytes	 6168KB 
 
 line_size: 32	 mapping ways 2 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 4059/511624	 hit rate: 99.212889%/0.787111%
-read : 49408 Bytes 	 48KB
- write : 147616 Bytes	 144KB 
+miss/hit: 497438/18245	 hit rate: 3.538026%/96.461974%
+read : 9713664 Bytes 	 9486KB
+ write : 6316032 Bytes	 6168KB 
 
 line_size: 32	 mapping ways 4 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2167/513516	 hit rate: 99.579781%/0.420219%
-read : 26912 Bytes 	 26KB
- write : 66816 Bytes	 65KB 
+miss/hit: 497323/18360	 hit rate: 3.560327%/96.439673%
+read : 9709344 Bytes 	 9481KB
+ write : 6315744 Bytes	 6167KB 
 
 line_size: 32	 mapping ways 4 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2072/513611	 hit rate: 99.598203%/0.401797%
-read : 24448 Bytes 	 23KB
- write : 64320 Bytes	 62KB 
+miss/hit: 497254/18429	 hit rate: 3.573707%/96.426293%
+read : 9707136 Bytes 	 9479KB
+ write : 6315744 Bytes	 6167KB 
 
 line_size: 32	 mapping ways 4 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2156/513527	 hit rate: 99.581914%/0.418086%
-read : 26432 Bytes 	 25KB
- write : 66976 Bytes	 65KB 
+miss/hit: 497330/18353	 hit rate: 3.558969%/96.441031%
+read : 9709600 Bytes 	 9482KB
+ write : 6315296 Bytes	 6167KB 
 
 line_size: 32	 mapping ways 8 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1265/514418	 hit rate: 99.754694%/0.245306%
-read : 17024 Bytes 	 16KB
- write : 28672 Bytes	 28KB 
+miss/hit: 497221/18462	 hit rate: 3.580106%/96.419894%
+read : 9705504 Bytes 	 9478KB
+ write : 6316416 Bytes	 6168KB 
 
 line_size: 32	 mapping ways 8 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1229/514454	 hit rate: 99.761675%/0.238325%
-read : 16000 Bytes 	 15KB
- write : 27776 Bytes	 27KB 
+miss/hit: 497176/18507	 hit rate: 3.588833%/96.411167%
+read : 9704064 Bytes 	 9476KB
+ write : 6316352 Bytes	 6168KB 
 
 line_size: 32	 mapping ways 8 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1232/514451	 hit rate: 99.761094%/0.238906%
-read : 16064 Bytes 	 15KB
- write : 27936 Bytes	 27KB 
+miss/hit: 497246/18437	 hit rate: 3.575258%/96.424742%
+read : 9706496 Bytes 	 9479KB
+ write : 6316000 Bytes	 6167KB 
 
 line_size: 32	 mapping ways 12 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1259/514424	 hit rate: 99.755858%/0.244142%
-read : 16928 Bytes 	 16KB
- write : 28800 Bytes	 28KB 
+miss/hit: 472432/43251	 hit rate: 8.387129%/91.612871%
+read : 9039424 Bytes 	 8827KB
+ write : 6311872 Bytes	 6163KB 
 
 line_size: 32	 mapping ways 12 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1221/514462	 hit rate: 99.763227%/0.236773%
-read : 15872 Bytes 	 15KB
- write : 27776 Bytes	 27KB 
+miss/hit: 472340/43343	 hit rate: 8.404970%/91.595030%
+read : 9036544 Bytes 	 8824KB
+ write : 6311776 Bytes	 6163KB 
 
 line_size: 32	 mapping ways 12 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1244/514439	 hit rate: 99.758767%/0.241233%
-read : 16448 Bytes 	 16KB
- write : 28672 Bytes	 28KB 
+miss/hit: 472141/43542	 hit rate: 8.443559%/91.556441%
+read : 9035520 Bytes 	 8823KB
+ write : 6306240 Bytes	 6158KB 
 
 line_size: 32	 mapping ways 16 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 779/514904	 hit rate: 99.848938%/0.151062%
-read : 11680 Bytes 	 11KB
- write : 13856 Bytes	 13KB 
+miss/hit: 497202/18481	 hit rate: 3.583791%/96.416209%
+read : 9704608 Bytes 	 9477KB
+ write : 6317600 Bytes	 6169KB 
 
 line_size: 32	 mapping ways 16 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 778/514905	 hit rate: 99.849132%/0.150868%
-read : 11680 Bytes 	 11KB
- write : 13792 Bytes	 13KB 
+miss/hit: 497158/18525	 hit rate: 3.592323%/96.407677%
+read : 9703200 Bytes 	 9475KB
+ write : 6317600 Bytes	 6169KB 
 
 line_size: 32	 mapping ways 16 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 779/514904	 hit rate: 99.848938%/0.151062%
-read : 11712 Bytes 	 11KB
- write : 13824 Bytes	 13KB 
+miss/hit: 497255/18428	 hit rate: 3.573513%/96.426487%
+read : 9706528 Bytes 	 9479KB
+ write : 6317280 Bytes	 6169KB 
 
 line_size: 64	 mapping ways 1 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 6606/509077	 hit rate: 98.718980%/1.281020%
-read : 240064 Bytes 	 234KB
- write : 382336 Bytes	 373KB 
+miss/hit: 497509/18174	 hit rate: 3.524258%/96.475742%
+read : 19427392 Bytes 	 18972KB
+ write : 12638592 Bytes	 12342KB 
 
 line_size: 64	 mapping ways 1 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 6606/509077	 hit rate: 98.718980%/1.281020%
-read : 240064 Bytes 	 234KB
- write : 382336 Bytes	 373KB 
+miss/hit: 497509/18174	 hit rate: 3.524258%/96.475742%
+read : 19427392 Bytes 	 18972KB
+ write : 12638592 Bytes	 12342KB 
 
 line_size: 64	 mapping ways 1 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 6606/509077	 hit rate: 98.718980%/1.281020%
-read : 240064 Bytes 	 234KB
- write : 382336 Bytes	 373KB 
+miss/hit: 497509/18174	 hit rate: 3.524258%/96.475742%
+read : 19427392 Bytes 	 18972KB
+ write : 12638592 Bytes	 12342KB 
 
 line_size: 64	 mapping ways 2 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2525/513158	 hit rate: 99.510358%/0.489642%
-read : 72768 Bytes 	 71KB
- write : 172352 Bytes	 168KB 
+miss/hit: 497454/18229	 hit rate: 3.534924%/96.465076%
+read : 19425472 Bytes 	 18970KB
+ write : 12636544 Bytes	 12340KB 
 
 line_size: 64	 mapping ways 2 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2373/513310	 hit rate: 99.539834%/0.460166%
-read : 64192 Bytes 	 62KB
- write : 165696 Bytes	 161KB 
+miss/hit: 497378/18305	 hit rate: 3.549661%/96.450339%
+read : 19420608 Bytes 	 18965KB
+ write : 12636544 Bytes	 12340KB 
 
 line_size: 64	 mapping ways 2 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2616/513067	 hit rate: 99.492712%/0.507288%
-read : 76480 Bytes 	 74KB
- write : 175488 Bytes	 171KB 
+miss/hit: 497481/18202	 hit rate: 3.529688%/96.470312%
+read : 19427072 Bytes 	 18971KB
+ write : 12636480 Bytes	 12340KB 
 
 line_size: 64	 mapping ways 4 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1421/514262	 hit rate: 99.724443%/0.275557%
-read : 42304 Bytes 	 41KB
- write : 86592 Bytes	 84KB 
+miss/hit: 497322/18361	 hit rate: 3.560521%/96.439479%
+read : 19415680 Bytes 	 18960KB
+ write : 12636672 Bytes	 12340KB 
 
 line_size: 64	 mapping ways 4 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1312/514371	 hit rate: 99.745580%/0.254420%
-read : 36352 Bytes 	 35KB
- write : 81280 Bytes	 79KB 
+miss/hit: 497260/18423	 hit rate: 3.572544%/96.427456%
+read : 19411712 Bytes 	 18956KB
+ write : 12636672 Bytes	 12340KB 
 
 line_size: 64	 mapping ways 4 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1421/514262	 hit rate: 99.724443%/0.275557%
-read : 41856 Bytes 	 40KB
- write : 85056 Bytes	 83KB 
+miss/hit: 497335/18348	 hit rate: 3.558000%/96.442000%
+read : 19416704 Bytes 	 18961KB
+ write : 12636352 Bytes	 12340KB 
 
 line_size: 64	 mapping ways 8 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 877/514806	 hit rate: 99.829934%/0.170066%
-read : 29056 Bytes 	 28KB
- write : 40896 Bytes	 39KB 
+miss/hit: 497286/18397	 hit rate: 3.567502%/96.432498%
+read : 19413568 Bytes 	 18958KB
+ write : 12637760 Bytes	 12341KB 
 
 line_size: 64	 mapping ways 8 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 823/514860	 hit rate: 99.840406%/0.159594%
-read : 25984 Bytes 	 25KB
- write : 38592 Bytes	 37KB 
+miss/hit: 497226/18457	 hit rate: 3.579137%/96.420863%
+read : 19409728 Bytes 	 18954KB
+ write : 12637760 Bytes	 12341KB 
 
 line_size: 64	 mapping ways 8 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 860/514823	 hit rate: 99.833231%/0.166769%
-read : 27712 Bytes 	 27KB
- write : 40640 Bytes	 39KB 
+miss/hit: 497344/18339	 hit rate: 3.556255%/96.443745%
+read : 19417472 Bytes 	 18962KB
+ write : 12637312 Bytes	 12341KB 
 
 line_size: 64	 mapping ways 12 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 868/514815	 hit rate: 99.831680%/0.168320%
-read : 28352 Bytes 	 27KB
- write : 42432 Bytes	 41KB 
+miss/hit: 472493/43190	 hit rate: 8.375300%/91.624700%
+read : 18107776 Bytes 	 17683KB
+ write : 12600768 Bytes	 12305KB 
 
 line_size: 64	 mapping ways 12 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 813/514870	 hit rate: 99.842345%/0.157655%
-read : 25152 Bytes 	 24KB
- write : 39296 Bytes	 38KB 
+miss/hit: 471808/43875	 hit rate: 8.508134%/91.491866%
+read : 18064192 Bytes 	 17640KB
+ write : 12600512 Bytes	 12305KB 
 
 line_size: 64	 mapping ways 12 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 845/514838	 hit rate: 99.836140%/0.163860%
-read : 26944 Bytes 	 26KB
- write : 41216 Bytes	 40KB 
+miss/hit: 472509/43174	 hit rate: 8.372198%/91.627802%
+read : 18109120 Bytes 	 17684KB
+ write : 12600128 Bytes	 12304KB 
 
 line_size: 64	 mapping ways 16 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 534/515149	 hit rate: 99.896448%/0.103552%
-read : 17664 Bytes 	 17KB
- write : 18560 Bytes	 18KB 
+miss/hit: 497214/18469	 hit rate: 3.581464%/96.418536%
+read : 19409856 Bytes 	 18954KB
+ write : 12638912 Bytes	 12342KB 
 
 line_size: 64	 mapping ways 16 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 533/515150	 hit rate: 99.896642%/0.103358%
-read : 17664 Bytes 	 17KB
- write : 18624 Bytes	 18KB 
+miss/hit: 497183/18500	 hit rate: 3.587475%/96.412525%
+read : 19407744 Bytes 	 18952KB
+ write : 12638848 Bytes	 12342KB 
 
 line_size: 64	 mapping ways 16 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 534/515149	 hit rate: 99.896448%/0.103552%
-read : 17664 Bytes 	 17KB
- write : 18432 Bytes	 18KB 
+miss/hit: 497305/18378	 hit rate: 3.563817%/96.436183%
+read : 19415808 Bytes 	 18960KB
+ write : 12638144 Bytes	 12341KB 
 
 line_size: 128	 mapping ways 1 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 6689/508994	 hit rate: 98.702885%/1.297115%
-read : 616320 Bytes 	 601KB
- write : 538368 Bytes	 525KB 
+miss/hit: 497629/18054	 hit rate: 3.500988%/96.499012%
+read : 38870016 Bytes 	 37959KB
+ write : 25277440 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 1 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 6689/508994	 hit rate: 98.702885%/1.297115%
-read : 616320 Bytes 	 601KB
- write : 538368 Bytes	 525KB 
+miss/hit: 497629/18054	 hit rate: 3.500988%/96.499012%
+read : 38870016 Bytes 	 37959KB
+ write : 25277440 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 1 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 6689/508994	 hit rate: 98.702885%/1.297115%
-read : 616320 Bytes 	 601KB
- write : 538368 Bytes	 525KB 
+miss/hit: 497629/18054	 hit rate: 3.500988%/96.499012%
+read : 38870016 Bytes 	 37959KB
+ write : 25277440 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 2 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2307/513376	 hit rate: 99.552632%/0.447368%
-read : 189056 Bytes 	 184KB
- write : 225152 Bytes	 219KB 
+miss/hit: 497461/18222	 hit rate: 3.533566%/96.466434%
+read : 38847744 Bytes 	 37937KB
+ write : 25276672 Bytes	 24684KB 
 
 line_size: 128	 mapping ways 2 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2121/513562	 hit rate: 99.588701%/0.411299%
-read : 168064 Bytes 	 164KB
- write : 210048 Bytes	 205KB 
+miss/hit: 497396/18287	 hit rate: 3.546171%/96.453829%
+read : 38839424 Bytes 	 37929KB
+ write : 25276672 Bytes	 24684KB 
 
 line_size: 128	 mapping ways 2 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 2353/513330	 hit rate: 99.543712%/0.456288%
-read : 189568 Bytes 	 185KB
- write : 236672 Bytes	 231KB 
+miss/hit: 497454/18229	 hit rate: 3.534924%/96.465076%
+read : 38846976 Bytes 	 37936KB
+ write : 25276416 Bytes	 24684KB 
 
 line_size: 128	 mapping ways 4 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1021/514662	 hit rate: 99.802010%/0.197990%
-read : 72448 Bytes 	 70KB
- write : 117760 Bytes	 115KB 
+miss/hit: 497438/18245	 hit rate: 3.538026%/96.461974%
+read : 38845952 Bytes 	 37935KB
+ write : 25277696 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 4 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 902/514781	 hit rate: 99.825086%/0.174914%
-read : 59648 Bytes 	 58KB
- write : 106240 Bytes	 103KB 
+miss/hit: 497387/18296	 hit rate: 3.547916%/96.452084%
+read : 38839424 Bytes 	 37929KB
+ write : 25277696 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 4 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 1066/514617	 hit rate: 99.793284%/0.206716%
-read : 76544 Bytes 	 74KB
- write : 119680 Bytes	 116KB 
+miss/hit: 497451/18232	 hit rate: 3.535505%/96.464495%
+read : 38847616 Bytes 	 37937KB
+ write : 25277184 Bytes	 24684KB 
 
 line_size: 128	 mapping ways 8 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 645/515038	 hit rate: 99.874923%/0.125077%
-read : 47232 Bytes 	 46KB
- write : 64896 Bytes	 63KB 
+miss/hit: 497363/18320	 hit rate: 3.552570%/96.447430%
+read : 38837632 Bytes 	 37927KB
+ write : 25277952 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 8 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 580/515103	 hit rate: 99.887528%/0.112472%
-read : 40576 Bytes 	 39KB
- write : 57088 Bytes	 55KB 
+miss/hit: 497294/18389	 hit rate: 3.565950%/96.434050%
+read : 38828800 Bytes 	 37918KB
+ write : 25277952 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 8 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 624/515059	 hit rate: 99.878995%/0.121005%
-read : 45312 Bytes 	 44KB
- write : 62208 Bytes	 60KB 
+miss/hit: 497421/18262	 hit rate: 3.541323%/96.458677%
+read : 38845184 Bytes 	 37934KB
+ write : 25277696 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 12 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 637/515046	 hit rate: 99.876475%/0.123525%
-read : 46720 Bytes 	 45KB
- write : 65536 Bytes	 64KB 
+miss/hit: 473011/42672	 hit rate: 8.274851%/91.725149%
+read : 36248320 Bytes 	 35398KB
+ write : 25232512 Bytes	 24641KB 
 
 line_size: 128	 mapping ways 12 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 580/515103	 hit rate: 99.887528%/0.112472%
-read : 40192 Bytes 	 39KB
- write : 58752 Bytes	 57KB 
+miss/hit: 472231/43452	 hit rate: 8.426107%/91.573893%
+read : 36148608 Bytes 	 35301KB
+ write : 25232512 Bytes	 24641KB 
 
 line_size: 128	 mapping ways 12 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 674/515009	 hit rate: 99.869300%/0.130700%
-read : 50816 Bytes 	 49KB
- write : 65536 Bytes	 64KB 
+miss/hit: 473245/42438	 hit rate: 8.229474%/91.770526%
+read : 36277888 Bytes 	 35427KB
+ write : 25232512 Bytes	 24641KB 
 
 line_size: 128	 mapping ways 16 	 swap_style 0 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 453/515230	 hit rate: 99.912155%/0.087845%
-read : 35072 Bytes 	 34KB
- write : 37120 Bytes	 36KB 
+miss/hit: 497248/18435	 hit rate: 3.574871%/96.425129%
+read : 38822912 Bytes 	 37913KB
+ write : 25278208 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 16 	 swap_style 1 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 419/515264	 hit rate: 99.918749%/0.081251%
-read : 31616 Bytes 	 30KB
- write : 32384 Bytes	 31KB 
+miss/hit: 497199/18484	 hit rate: 3.584373%/96.415627%
+read : 38816512 Bytes 	 37906KB
+ write : 25278208 Bytes	 24685KB 
 
 line_size: 128	 mapping ways 16 	 swap_style 2 
 all r/w/sum: 318197 197486 515683 
 read rate: 61.703993%	write rate: 38.296007%
-miss/hit: 436/515247	 hit rate: 99.915452%/0.084548%
-read : 33536 Bytes 	 32KB
- write : 33024 Bytes	 32KB 
+miss/hit: 497402/18281	 hit rate: 3.545007%/96.454993%
+read : 38841984 Bytes 	 37931KB
+ write : 25278080 Bytes	 24685KB 
 
 Process finished with exit code 0

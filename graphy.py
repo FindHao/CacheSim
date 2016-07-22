@@ -33,9 +33,8 @@ def work():
 				ans2 = ans2[0]
 				arate.miss_rate = float(ans2)
 				line = f.readline()
-				reg3 = re.compile(".+ (\d+)KB")
+				reg3 = re.compile(".+ (\d+) Bytes")
 				ans3 = reg3.findall(line)[0]
-				print(ans3)
 				arate.read = int(ans3)
 				line = f.readline()
 				ans4 = reg3.findall(line)[0]
@@ -57,20 +56,30 @@ def draw():
 	# print(y)
 	# plt.plot(x, y, 'r')
 
-	# 不同替换策略
-	x1 = []
-	y1 = []
-	y2 = []
-	for node in rates:
-		if node.size == 32 and node.way == 8:
-			x1.append(node.swap)
-			# y1.append(node.miss_rate)
-			y1.append(node.read)
-			y2.append(node.write)
-	print(x1, y1)
-	plt.bar(x1, y1, alpha=.5, color = 'g')
-	plt.bar(x1, y2, alpha=.5, color = 'r')
+	# # 不同替换策略
+	# x1 = []
+	# y1 = []
+	# y2 = []
+	# for node in rates:
+	# 	if node.size == 32 and node.way == 8:
+	# 		x1.append(node.swap)
+	# 		# y1.append(node.miss_rate)
+	# 		y1.append(node.read)
+	# 		y2.append(node.write)
+	# print(x1, y1)
+	# print(x1, y2)
+	# plt.bar(x1, y1, alpha=.5, color = 'g')
+	# plt.bar(x1, y2, alpha=.5, color = 'r')
 
+	# 不同的cache line size
+	x3 = []
+	y3 = []
+	for node in rates:
+		if node.way == 8 and node.swap == 1:
+			x3.append(node.size)
+			y3.append(node.miss_rate)
+	print(x3,y3)
+	plt.plot(x3, y3)
 
 	plt.show()
 

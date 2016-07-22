@@ -64,7 +64,7 @@ int CacheSim::check_cache_hit(_u32 set_base, _u32 addr) {
     _u32 i, tag;
     for (i = 0; i < this->cache_mapping_ways; ++i) {
         tag = this->caches[set_base + i].tag;
-        if ((tag & CACHE_FLAG_VAILD) && ((tag & this->cache_tag_mask) == (addr & this->cache_tag_mask))) {
+        if ((tag & CACHE_FLAG_VAILD) && (tag == (addr >> (this->cache_set_shifts + this->cache_line_shifts + this->cache_mapping_ways_shifts)))) {
             return set_base + i;
         }
     }
@@ -118,7 +118,8 @@ void CacheSim::set_cache_line(_u32 index, _u32 addr) {
     // 这里每个line的buf和整个cache类的buf是重复的而且并没有填充内容。
     line->buf = this->cache_buf + this->cache_line_size * index;
     // 更新这个line的tag位
-    line->tag = addr & ~CACHE_FLAG_MASK;
+//    line->tag = addr & ~CACHE_FLAG_MASK;
+    line->tag = (addr >> (this->cache_set_shifts + this->cache_line_shifts + this->cache_mapping_ways_shifts)) & ~CACHE_FLAG_MASK;
     // 置有效位为有效。
     line->tag |= CACHE_FLAG_VAILD;
     line->count = this->tick_count;
@@ -140,7 +141,7 @@ void CacheSim::do_cache_op(_u32 addr, bool is_read) {
     //命中了
     if (index >= 0) {
         this->cache_hit_count++;
-        //只有在LRU的时候才更新时间戳
+        //只有在LRU的时候才更新时间戳?????
         if (CACHE_SWAP_LRU == this->swap_style)
             this->caches[index].lru_count = this->tick_count;
         //直接默认配置为写回法，即要替换或者数据脏了的时候才写回。
