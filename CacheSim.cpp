@@ -89,7 +89,7 @@ _u32 CacheSim::get_cache_free_line(_u32 set_base) {
         }
     }
     free_index += set_base;
-    //如果原有的cache line是脏数据，写回内存
+    //如果原有的cache line是脏数据，标记脏位
     if (caches[free_index].flag & CACHE_FLAG_DIRTY) {
         caches[free_index].flag &= ~CACHE_FLAG_DIRTY;
         cache_w_count++;
@@ -104,21 +104,14 @@ void CacheSim::set_cache_line(_u32 index, _u32 addr) {
     line->buf = cache_buf + cache_line_size * index;
     // 更新这个line的tag位
     line->tag = addr >> (cache_set_shifts + cache_line_shifts );
-    // 置有效位为有效。
     line->flag = (_u8)~CACHE_FLAG_MASK;
     line->flag |= CACHE_FLAG_VAILD;
     line->count = tick_count;
 }
 
-/**这里是真正操作地址的函数，原作者的代码写错了，内存地址的划分都没有明确了解。
- * 内存地址划分格式应该如下：
- * |tag|组号（属于哪一个set）|组内块号log2(cache_mapping_ways)|块内地址log2(cache_line_size)|
- * 所以，应该先获得当前地址属于哪一个set，在check的时候，对这个set的line进行验证。
- * */
 void CacheSim::do_cache_op(_u32 addr, bool is_read) {
     _u32 set, set_base;
     int index;
-    // TODO: add the init of cache_mapping_ways_shifts
     set = (addr >>cache_line_shifts) % cache_set_size;
     //获得组号的基地址
     set_base = set * cache_mapping_ways;
@@ -138,7 +131,6 @@ void CacheSim::do_cache_op(_u32 addr, bool is_read) {
         //miss
     } else {
         index = get_cache_free_line(set_base);
-        //由于我暂时不需要统计缺失原因，所以下面关于addr list的都可以先不用实现。
         set_cache_line((_u32)index, addr);
         if (is_read) {
             cache_r_count++;

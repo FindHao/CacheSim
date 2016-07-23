@@ -92,6 +92,16 @@ fuck....
 所以应该从内存地址划分和cache的划分两个方面来说明。
 终于明白了。。
 所以cache line那里，还需要添加单独的标记位。
+为何我改了gitignore文件仍然检测input和workspace.xml文件的修改？？？
+TODO：
+graphy.py文件实现根据输入展示不同的图标
+
+## July 23, 2016 3:37 PM
+LRU，FIFO时间戳的说明单独说明
+
+
+
+
 
 
 

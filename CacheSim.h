@@ -7,15 +7,7 @@
 #define CACHE_SIM
 typedef unsigned char _u8;
 typedef unsigned int _u32;
-/**tag的最后四位作为标志位，
- * 0x1: 有效位
- * 0x2: 脏位
- * 0x4: 是否上锁*/
-// .... define不能加;忘了。。
-//#define CACHE_FLAG_VAILD 0x01
-//#define CACHE_FLAG_DIRTY 0x02
-//#define CACHE_FLAG_LOCK 0x04
-//#define CACHE_FLAG_MASK 0xff
+
 const unsigned char CACHE_FLAG_VAILD = 0x01;
 const unsigned char CACHE_FLAG_DIRTY = 0x02;
 const unsigned char CACHE_FLAG_LOCK = 0x04;

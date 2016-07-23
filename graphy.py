@@ -1,4 +1,7 @@
+#!/usr/bin/python3
+import sys
 import re
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 mapping_ways = [1, 2, 4, 8, 12, 16]
 line_size = [32, 64, 128]
@@ -42,21 +45,51 @@ def work():
 				rates.append(arate)
 			line = f.readline()
 
+def draw_way():
+	"""不同way数量的miss rate
+	相同的：cache line size 、swap style
+	测试发现折线的走势，不同line size类似，所以默认cache_line_size 32 byte，swap style
+	way为1的时候，变化太大了，去掉这种情况。
+	不同的替换策略现在就可以看出好坏，
+	"""
+	line_size = [32,64,128]
+	swap = [0,1,2]
+	swap_description = ["FIFO",'LRU','RAND']
+	color_map = 'rgbyck'
+	plts = []
+	my_patches = []
+	for line in swap:
+		x = []
+		y = []
+		for node in rates:
+			# print(type(node.swap), type(node.size))
+			if	(node.size == 32) and (node.swap == line) and (node.way != 1):
+				y.append(node.miss_rate)
+				x.append(node.way)
+			# plt.subplot(221+ swap.index(line))
+		plt.plot(x, y, color_map[line], )
+		# 添加图例
+		my_patches.append(mpatches.Patch(color=color_map[line],label=swap_description[line]))
+	plt.legend(handles=my_patches)
+
 def draw():
 	global rates
-	# 先画相同替换策略 0 ，相同cache line size 32kb，不同way的miss rate
-	# y  = []
-	# x = []
-	# for node in rates:
-	# 	# print(type(node.swap), type(node.size))
-	# 	if	(node.size == 32) and (node.swap == 0):
-	# 		y.append(node.miss_rate)
-	# 		x.append(node.way)
-	# print(x)
-	# print(y)
-	# plt.plot(x, y, 'r')
+	# 不同way的miss rate 相同替换策略 0 ，相同cache line size 32byte
+	y  = []
+	x = []
+	for node in rates:
+		# print(type(node.swap), type(node.size))
+		if	(node.size == 32) and (node.swap == 0):
+			y.append(node.miss_rate)
+			x.append(node.way)
+	print(x)
+	print(y)
 
-	# # 不同替换策略
+	plt.subplot(221)
+	plt.plot(x, y, 'r')
+	plt.grid(True)
+
+	# # # 不同替换策略
 	# x1 = []
 	# y1 = []
 	# y2 = []
@@ -68,20 +101,23 @@ def draw():
 	# 		y2.append(node.write)
 	# print(x1, y1)
 	# print(x1, y2)
+	# plt.subplot(223)
 	# plt.bar(x1, y1, alpha=.5, color = 'g')
 	# plt.bar(x1, y2, alpha=.5, color = 'r')
-
-	# 不同的cache line size
-	x3 = []
-	y3 = []
-	for node in rates:
-		if node.way == 8 and node.swap == 1:
-			x3.append(node.size)
-			y3.append(node.miss_rate)
-	print(x3,y3)
-	plt.plot(x3, y3)
-
-	plt.show()
+	# plt.grid(True)
+	# # 不同的cache line size
+	# x3 = []
+	# y3 = []
+	# for node in rates:
+	# 	if node.way == 8 and node.swap == 1:
+	# 		x3.append(node.size)
+	# 		y3.append(node.miss_rate)
+	# print(x3,y3)
+	# plt.subplot(222)
+	# plt.plot(x3, y3)
+	# plt.grid(True)
+	# plt.show()
 
 work()
-draw()
+draw_way()
+plt.show()
