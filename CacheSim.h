@@ -85,13 +85,19 @@ public:
      * TODO: check the addr */
     int check_cache_hit(_u32 set_base, _u32 addr);
     /**获取cache当前set中空余的line*/
-    _u32 get_cache_free_line(_u32 set_base);
+    int get_cache_free_line(_u32 set_base);
     /**找到合适的line之后，将数据写入cache line中*/
     void set_cache_line(_u32 index, _u32 addr);
     /**对一个指令进行分析*/
     void do_cache_op(_u32 addr, char oper_style);
     /**读入trace文件*/
     void load_trace(char * filename);
+
+    /**lock a cache line*/
+    int lock_cache_line(_u32 line_index);
+    /**unlock a cache line*/
+    int unlock_cache_line(_u32 line_index);
+
 };
 
 #endif
