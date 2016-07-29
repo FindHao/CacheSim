@@ -183,8 +183,8 @@ void CacheSim::load_trace(char *filename) {
         sscanf(buf, "%c %x", &style, &addr);
         do_cache_op(addr, style);
         switch (style) {
-            case 'l' :rcount++;break;
-            case 's' :wcount++;break;
+            case 'l' :rcount++;tick_count++;break;
+            case 's' :wcount++;tick_count++;break;
             case 'k' :                break;
             case 'u' :                break;
 
@@ -196,7 +196,7 @@ void CacheSim::load_trace(char *filename) {
 //            do_cache_op(addr, 0);
 //            wcount++;
 //        }
-        tick_count++;
+
     }
     //TODO 添加printf打印测试结果。
     // 指令统计

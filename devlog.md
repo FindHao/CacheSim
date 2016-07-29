@@ -120,7 +120,10 @@ HM中何时lock
 应该是先指定要锁的内容，然后再执行load这个步骤？？？NO，先load，再立刻锁，则lock的时候，一定是命中的，只需要设置cache line的标志位即可。
 对比测试：
 cache line 32byte ,mapping ways 8 ,cache size 64KB
-柱状图？？？
+柱状图？？？横坐标：
+
+我傻逼了啊。。。
+我的测试数据并没有使用cache locking的数据，但是miss率仍旧降低了。。。。。。。。。。。。。。。。。说明我的代码写的有问题
 
 
 
