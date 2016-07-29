@@ -13,7 +13,7 @@ int main() {
     int cache_size[] = {0x8000,0x10000,0x20000};
     int i,j,m;
     CacheSim *cache;
-    for (m = 0;m<6;m ++){
+    for (m = 0;m<sizeof(cache_size)/sizeof(int);m ++){
         for (i=0; i<sizeof(line_size)/sizeof(int); i++){
             for (j=0; j<sizeof(ways)/sizeof(int); j++){
                 for (int k = CACHE_SWAP_FIFO; k < CACHE_SWAP_MAX; ++k) {
