@@ -10,7 +10,7 @@ int main() {
     int line_size[] = {32};
     int ways[] = {1, 2, 4, 8, 12, 16, 32};
 //    int ways[] = {8};
-    int cache_size[] = {0x800,0x1000,0x2000,0x4000,0x8000,0x10000,0x20000,0x40000,0x80000};
+    int cache_size[] = {0x8000,0x10000,0x20000};
     int i,j,m;
     CacheSim *cache;
     for (m = 0;m<6;m ++){
