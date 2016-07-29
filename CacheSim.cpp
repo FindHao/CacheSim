@@ -109,7 +109,7 @@ void CacheSim::set_cache_line(_u32 index, _u32 addr) {
     line->count = tick_count;
 }
 
-void CacheSim::do_cache_op(_u32 addr, bool is_read) {
+void CacheSim::do_cache_op(_u32 addr, char oper_style) {
     _u32 set, set_base;
     int index;
     set = (addr >>cache_line_shifts) % cache_set_size;
@@ -126,13 +126,13 @@ void CacheSim::do_cache_op(_u32 addr, bool is_read) {
             caches[index].lru_count = tick_count;
         //直接默认配置为写回法，即要替换或者数据脏了的时候才写回。
         //命中了，如果是改数据，不直接写回，而是等下次，即没有命中，但是恰好匹配到了当前line的时候，这时的标记就起作用了，将数据写回内存
-        if (!is_read)
+        if (oper_style == OPERATION_READ)
             caches[index].flag |= CACHE_FLAG_DIRTY;
         //miss
     } else {
         index = get_cache_free_line(set_base);
         set_cache_line((_u32)index, addr);
-        if (is_read) {
+        if (oper_style == OPERATION_READ) {
             cache_r_count++;
         } else {
             cache_w_count++;
@@ -158,6 +158,13 @@ void CacheSim::load_trace(char *filename) {
         // 原代码中用的指针，感觉完全没必要，而且后面他的强制类型转换实际运行有问题。addr本身就是一个数值，32位unsigned int。
         _u32 addr =0;
         sscanf(buf, "%c %x", &style, &addr);
+        switch (style){
+            case 'l' : break;
+            case 's' : break;
+            case 'k' : break;
+            case 'u' : break;
+
+        }
         if(style == 'l'){
             do_cache_op(addr, 1);
             rcount++;

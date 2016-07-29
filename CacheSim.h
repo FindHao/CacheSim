@@ -12,6 +12,11 @@ const unsigned char CACHE_FLAG_VAILD = 0x01;
 const unsigned char CACHE_FLAG_DIRTY = 0x02;
 const unsigned char CACHE_FLAG_LOCK = 0x04;
 const unsigned char CACHE_FLAG_MASK = 0xff;
+
+const char OPERATION_READ = 'l';
+const char OPERATION_WRITE = 's';
+const char OPERATION_LOCK = 'k';
+const char OPERATION_UNLOCK = 'u';
 // 替换算法
 enum cache_swap_style {
     CACHE_SWAP_FIFO,
@@ -84,7 +89,7 @@ public:
     /**找到合适的line之后，将数据写入cache line中*/
     void set_cache_line(_u32 index, _u32 addr);
     /**对一个指令进行分析*/
-    void do_cache_op(_u32 addr, bool is_read);
+    void do_cache_op(_u32 addr, char oper_style);
     /**读入trace文件*/
     void load_trace(char * filename);
 };
