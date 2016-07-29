@@ -1,4 +1,4 @@
 # CacheSim
-简单的模拟cache
-# 代码
-第一版是看学论坛里某位ucsd学生的代码，ucsd有门课程[cse240a: Principles of Computer Architecture](http://cseweb.ucsd.edu/classes/fa07/cse240a/)，其中project2是写一个cache模拟器，这是他们的作业。
+##[手册主页](http://www.findspace.name/easycoding/1717)
+# 说明
+这个项目记录了写的简易cache模拟器，手册里记录了对该项目的详细介绍和代码解释。
