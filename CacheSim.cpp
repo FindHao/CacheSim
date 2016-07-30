@@ -85,12 +85,11 @@ int CacheSim::get_cache_free_line(_u32 set_base) {
     if (swap_style == CACHE_SWAP_RAND) {
         free_index = rand() % cache_mapping_ways;
     } else {
-//        min_count = caches[set_base].count;
         // !!!BUG Fixed
             min_count = UINT_MAX;
         for (j = 0; j < cache_mapping_ways; ++j) {
-//            if (caches[set_base + j].count < min_count && !(caches[set_base + j].flag &CACHE_FLAG_LOCK)) {
-            if (caches[set_base + j].count < min_count ) {
+            if (caches[set_base + j].count < min_count && !(caches[set_base + j].flag &CACHE_FLAG_LOCK)) {
+//            if (caches[set_base + j].count < min_count ) {
                 min_count = caches[set_base + j].count;
                 free_index = j;
             }
@@ -105,7 +104,7 @@ int CacheSim::get_cache_free_line(_u32 set_base) {
             cache_w_count++;
         }
     }else{
-        printf("ohhhhh");
+//        printf("ohhhhh");
     }
     return free_index;
 }
@@ -143,12 +142,12 @@ void CacheSim::do_cache_op(_u32 addr, char oper_style) {
             //命中了，如果是改数据，不直接写回，而是等下次，即没有命中，但是恰好匹配到了当前line的时候，这时的标记就起作用了，将数据写回内存
             if (oper_style == OPERATION_WRITE)
                 caches[index].flag |= CACHE_FLAG_DIRTY;
-//        }else{
-//            if (oper_style == OPERATION_LOCK){
-//                lock_cache_line((_u32)index);
-//            }else{
-//                unlock_cache_line((_u32)index);
-//            }
+        }else{
+            if (oper_style == OPERATION_LOCK){
+                lock_cache_line((_u32)index);
+            }else{
+                unlock_cache_line((_u32)index);
+            }
         }
     //miss
     } else {
@@ -165,7 +164,8 @@ void CacheSim::do_cache_op(_u32 addr, char oper_style) {
                 cache_miss_count++;
             }else{
                 // 如果是write,而且没有知道替换的块，那就直接写回到主存，目前这里的操作被忽略。后续加上时间延迟
-                printf("hello");
+                // test
+//                printf("hello");
             }
         }
         // 如果是进行lock unlock操作时miss，目前先不管，因为现在设置的策略是替换时不能替换lock状态的line
@@ -197,13 +197,6 @@ void CacheSim::load_trace(char *filename) {
             case 'u' :                break;
 
         }
-//        if (style == 'l') {
-//            do_cache_op(addr, 1);
-//            rcount++;
-//        } else {
-//            do_cache_op(addr, 0);
-//            wcount++;
-//        }
 
     }
     //TODO 添加printf打印测试结果。
