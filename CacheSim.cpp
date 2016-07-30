@@ -10,6 +10,7 @@
 #include <math.h>
 #include <cstdio>
 #include <time.h>
+#include <climits>
 
 CacheSim::CacheSim(int cache_size, int cache_line_size, int mapping_ways) {
 //如果输入配置不符合要求
@@ -57,7 +58,7 @@ int CacheSim::check_cache_hit(_u32 set_base, _u32 addr) {
     /**循环查找当前set的所有way（line），通过tag匹配，查看当前地址是否在cache中*/
     _u32 i;
     for (i = 0; i < cache_mapping_ways; ++i) {
-        if ((caches[set_base + i].flag & CACHE_FLAG_VAILD) &&
+        if ((caches[set_base + i].flag & CACHE_FLAG_VALID) &&
             (caches[set_base + i].tag == ((addr >> (cache_set_shifts + cache_line_shifts))))) {
             return set_base + i;
         }
@@ -72,7 +73,7 @@ int CacheSim::get_cache_free_line(_u32 set_base) {
     /**从当前cache set里找可用的空闲line，可用：脏数据，空闲数据
      * cache_free_num是统计的整个cache的可用块*/
     for (i = 0; i < cache_mapping_ways; ++i) {
-        if (!(caches[set_base + i].flag & CACHE_FLAG_VAILD)) {
+        if (!(caches[set_base + i].flag & CACHE_FLAG_VALID)) {
             if (cache_free_num > 0)
                 cache_free_num--;
             return set_base + i;
@@ -84,9 +85,12 @@ int CacheSim::get_cache_free_line(_u32 set_base) {
     if (swap_style == CACHE_SWAP_RAND) {
         free_index = rand() % cache_mapping_ways;
     } else {
-        min_count = caches[set_base].count;
-        for (j = 1; j < cache_mapping_ways; ++j) {
-            if (caches[set_base + j].count < min_count && caches[set_base + j].flag &CACHE_FLAG_LOCK != CACHE_FLAG_LOCK) {
+//        min_count = caches[set_base].count;
+        // !!!BUG Fixed
+            min_count = UINT_MAX;
+        for (j = 0; j < cache_mapping_ways; ++j) {
+//            if (caches[set_base + j].count < min_count && !(caches[set_base + j].flag &CACHE_FLAG_LOCK)) {
+            if (caches[set_base + j].count < min_count ) {
                 min_count = caches[set_base + j].count;
                 free_index = j;
             }
@@ -95,10 +99,13 @@ int CacheSim::get_cache_free_line(_u32 set_base) {
     if(free_index >= 0){
         free_index += set_base;
         //如果原有的cache line是脏数据，标记脏位
+        // 目前如果是lock 状态的line不会被选中，所以这里的dirty标记肯定不会给一个locked line
         if (caches[free_index].flag & CACHE_FLAG_DIRTY) {
             caches[free_index].flag &= ~CACHE_FLAG_DIRTY;
             cache_w_count++;
         }
+    }else{
+        printf("ohhhhh");
     }
     return free_index;
 }
@@ -111,7 +118,7 @@ void CacheSim::set_cache_line(_u32 index, _u32 addr) {
     // 更新这个line的tag位
     line->tag = addr >> (cache_set_shifts + cache_line_shifts);
     line->flag = (_u8) ~CACHE_FLAG_MASK;
-    line->flag |= CACHE_FLAG_VAILD;
+    line->flag |= CACHE_FLAG_VALID;
     line->count = tick_count;
 }
 
@@ -134,14 +141,14 @@ void CacheSim::do_cache_op(_u32 addr, char oper_style) {
                 caches[index].lru_count = tick_count;
             //直接默认配置为写回法，即要替换或者数据脏了的时候才写回。
             //命中了，如果是改数据，不直接写回，而是等下次，即没有命中，但是恰好匹配到了当前line的时候，这时的标记就起作用了，将数据写回内存
-            if (oper_style == OPERATION_READ)
+            if (oper_style == OPERATION_WRITE)
                 caches[index].flag |= CACHE_FLAG_DIRTY;
-        }else{
-            if (oper_style == OPERATION_LOCK){
-                lock_cache_line((_u32)index);
-            }else{
-                unlock_cache_line((_u32)index);
-            }
+//        }else{
+//            if (oper_style == OPERATION_LOCK){
+//                lock_cache_line((_u32)index);
+//            }else{
+//                unlock_cache_line((_u32)index);
+//            }
         }
     //miss
     } else {
@@ -158,6 +165,7 @@ void CacheSim::do_cache_op(_u32 addr, char oper_style) {
                 cache_miss_count++;
             }else{
                 // 如果是write,而且没有知道替换的块，那就直接写回到主存，目前这里的操作被忽略。后续加上时间延迟
+                printf("hello");
             }
         }
         // 如果是进行lock unlock操作时miss，目前先不管，因为现在设置的策略是替换时不能替换lock状态的line

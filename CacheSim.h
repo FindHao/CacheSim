@@ -8,7 +8,7 @@
 typedef unsigned char _u8;
 typedef unsigned int _u32;
 
-const unsigned char CACHE_FLAG_VAILD = 0x01;
+const unsigned char CACHE_FLAG_VALID = 0x01;
 const unsigned char CACHE_FLAG_DIRTY = 0x02;
 const unsigned char CACHE_FLAG_LOCK = 0x04;
 const unsigned char CACHE_FLAG_MASK = 0xff;
