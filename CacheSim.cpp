@@ -86,7 +86,7 @@ int CacheSim::get_cache_free_line(_u32 set_base) {
     } else {
         min_count = caches[set_base].count;
         for (j = 1; j < cache_mapping_ways; ++j) {
-            if (caches[set_base + j].count < min_count && ~(caches[set_base + j].flag &CACHE_FLAG_LOCK)) {
+            if (caches[set_base + j].count < min_count && caches[set_base + j].flag &CACHE_FLAG_LOCK != CACHE_FLAG_LOCK) {
                 min_count = caches[set_base + j].count;
                 free_index = j;
             }
