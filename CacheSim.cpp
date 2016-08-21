@@ -17,17 +17,17 @@ CacheSim::CacheSim(int cache_size, int cache_line_size, int mapping_ways) {
     if (cache_line_size < 0 || mapping_ways < 1) {
         return;
     }
-    this->cache_size = (_u32) cache_size;
-    this->cache_line_size = (_u32) cache_line_size;
+    this->cache_size = (_u64) cache_size;
+    this->cache_line_size = (_u64) cache_line_size;
     // 总的line数 = cache总大小/ 每个line的大小（一般64byte，模拟的时候可配置）
-    cache_line_num = (_u32) cache_size / cache_line_size;
-    cache_line_shifts = (_u32) log2(cache_line_size);
+    cache_line_num = (_u64) cache_size / cache_line_size;
+    cache_line_shifts = (_u64) log2(cache_line_size);
     // 几路组相联
-    cache_mapping_ways = (_u32) mapping_ways;
+    cache_mapping_ways = (_u64) mapping_ways;
     // 总共有多少set
     cache_set_size = cache_line_num / mapping_ways;
     // 其二进制占用位数，同其他shifts
-    cache_set_shifts = (_u32) log2(cache_set_size);
+    cache_set_shifts = (_u64) log2(cache_set_size);
     // 空闲块（line）
     cache_free_num = cache_line_num;
 
@@ -54,9 +54,9 @@ CacheSim::~CacheSim() {
     free(cache_buf);
 }
 
-int CacheSim::check_cache_hit(_u32 set_base, _u32 addr) {
+int CacheSim::check_cache_hit(_u64 set_base, _u64 addr) {
     /**循环查找当前set的所有way（line），通过tag匹配，查看当前地址是否在cache中*/
-    _u32 i;
+    _u64 i;
     for (i = 0; i < cache_mapping_ways; ++i) {
         if ((caches[set_base + i].flag & CACHE_FLAG_VALID) &&
             (caches[set_base + i].tag == ((addr >> (cache_set_shifts + cache_line_shifts))))) {
@@ -67,8 +67,8 @@ int CacheSim::check_cache_hit(_u32 set_base, _u32 addr) {
 }
 
 /**获取当前set中可用的line，如果没有，就找到要被替换的块*/
-int CacheSim::get_cache_free_line(_u32 set_base) {
-    _u32 i, min_count, j;
+int CacheSim::get_cache_free_line(_u64 set_base) {
+    _u64 i, min_count, j;
     int free_index;
     /**从当前cache set里找可用的空闲line，可用：脏数据，空闲数据
      * cache_free_num是统计的整个cache的可用块*/
@@ -110,7 +110,7 @@ int CacheSim::get_cache_free_line(_u32 set_base) {
 }
 
 /**将数据写入cache line*/
-void CacheSim::set_cache_line(_u32 index, _u32 addr) {
+void CacheSim::set_cache_line(_u64 index, _u64 addr) {
     Cache_Line *line = caches + index;
     // 这里每个line的buf和整个cache类的buf是重复的而且并没有填充内容。
     line->buf = cache_buf + cache_line_size * index;
@@ -121,8 +121,8 @@ void CacheSim::set_cache_line(_u32 index, _u32 addr) {
     line->count = tick_count;
 }
 
-void CacheSim::do_cache_op(_u32 addr, char oper_style) {
-    _u32 set, set_base;
+void CacheSim::do_cache_op(_u64 addr, char oper_style) {
+    _u64 set, set_base;
     int index;
     set = (addr >> cache_line_shifts) % cache_set_size;
     //获得组号的基地址
@@ -144,9 +144,9 @@ void CacheSim::do_cache_op(_u32 addr, char oper_style) {
                 caches[index].flag |= CACHE_FLAG_DIRTY;
         }else{
             if (oper_style == OPERATION_LOCK){
-                lock_cache_line((_u32)index);
+                lock_cache_line((_u64)index);
             }else{
-                unlock_cache_line((_u32)index);
+                unlock_cache_line((_u64)index);
             }
         }
     //miss
@@ -155,7 +155,7 @@ void CacheSim::do_cache_op(_u32 addr, char oper_style) {
             index = get_cache_free_line(set_base);
             // >=0 表示顺利找到了可以替换的块，否则说明全部都被锁定了。
             if(index >= 0 ){
-                set_cache_line((_u32) index, addr);
+                set_cache_line((_u64) index, addr);
                 if (oper_style == OPERATION_READ) {
                     cache_r_count++;
                 } else {
@@ -178,7 +178,7 @@ void CacheSim::load_trace(char *filename) {
     // 添加自己的input路径
     FILE *fin;
     // 记录的是trace中指令的读写，由于cache机制，和真正的读写次数当然不一样。。主要是如果设置的写回法，则写会等在cache中，直到被替换。
-    _u32 rcount = 0, wcount = 0;
+    _u64 rcount = 0, wcount = 0;
     fin = fopen(filename, "r");
     if (!fin) {
         printf("load_trace %s failed\n", filename);
@@ -187,7 +187,7 @@ void CacheSim::load_trace(char *filename) {
     while (fgets(buf, sizeof(buf), fin)) {
         _u8 style = 0;
         // 原代码中用的指针，感觉完全没必要，而且后面他的强制类型转换实际运行有问题。addr本身就是一个数值，32位unsigned int。
-        _u32 addr = 0;
+        _u64 addr = 0;
         sscanf(buf, "%c %x", &style, &addr);
         do_cache_op(addr, style);
         switch (style) {
@@ -225,12 +225,12 @@ void CacheSim::set_swap_style(int swap_style) {
     this->swap_style = swap_style;
 }
 
-int CacheSim::lock_cache_line(_u32 line_index) {
+int CacheSim::lock_cache_line(_u64 line_index) {
     caches[line_index].flag |= CACHE_FLAG_LOCK;
     return 0;
 }
 
-int CacheSim::unlock_cache_line(_u32 line_index) {
+int CacheSim::unlock_cache_line(_u64 line_index) {
     caches[line_index].flag &= ~CACHE_FLAG_LOCK;
     return 0;
 }
