@@ -12,20 +12,20 @@
 #include <time.h>
 #include <climits>
 
-CacheSim::CacheSim(int cache_size, int cache_line_size, int mapping_ways) {
+CacheSim::CacheSim(int a_cache_size, int a_cache_line_size, int a_mapping_ways) {
 //如果输入配置不符合要求
-    if (cache_line_size < 0 || mapping_ways < 1) {
+    if (a_cache_line_size < 0 || a_mapping_ways < 1) {
         return;
     }
-    this->cache_size = (_u64) cache_size;
-    this->cache_line_size = (_u64) cache_line_size;
+    this->cache_size = (_u64) a_cache_size;
+    this->cache_line_size = (_u64) a_cache_line_size;
     // 总的line数 = cache总大小/ 每个line的大小（一般64byte，模拟的时候可配置）
-    cache_line_num = (_u64) cache_size / cache_line_size;
-    cache_line_shifts = (_u64) log2(cache_line_size);
+    cache_line_num = (_u64) a_cache_size / a_cache_line_size;
+    cache_line_shifts = (_u64) log2(a_cache_line_size);
     // 几路组相联
-    cache_mapping_ways = (_u64) mapping_ways;
+    cache_mapping_ways = (_u64) a_mapping_ways;
     // 总共有多少set
-    cache_set_size = cache_line_num / mapping_ways;
+    cache_set_size = cache_line_num / a_mapping_ways;
     // 其二进制占用位数，同其他shifts
     cache_set_shifts = (_u64) log2(cache_set_size);
     // 空闲块（line）
@@ -83,28 +83,38 @@ int CacheSim::get_cache_free_line(_u64 set_base) {
      * lock状态的块如何处理？？*/
     free_index = -1;
     if (swap_style == CACHE_SWAP_RAND) {
+        // TODO: 随机替换Lock状态的line后面再改
         free_index = rand() % cache_mapping_ways;
     } else {
         // !!!BUG Fixed
-            min_count = UINT_MAX;
+        min_count = UINT_MAX;
         for (j = 0; j < cache_mapping_ways; ++j) {
             if (caches[set_base + j].count < min_count && !(caches[set_base + j].flag &CACHE_FLAG_LOCK)) {
-//            if (caches[set_base + j].count < min_count ) {
                 min_count = caches[set_base + j].count;
                 free_index = j;
             }
         }
     }
+    if(free_index < 0){
+        //如果全部被锁定了，应该会走到这里来。那么强制进行替换。强制替换的时候，需要setline?
+        min_count = UINT_MAX;
+        for (j = 0; j < cache_mapping_ways; ++j) {
+            if (caches[set_base + j].count < min_count) {
+                min_count = caches[set_base + j].count;
+                free_index = j;
+            }
+        }
+    }
+    //
     if(free_index >= 0){
         free_index += set_base;
         //如果原有的cache line是脏数据，标记脏位
-        // 目前如果是lock 状态的line不会被选中，所以这里的dirty标记肯定不会给一个locked line
         if (caches[free_index].flag & CACHE_FLAG_DIRTY) {
             caches[free_index].flag &= ~CACHE_FLAG_DIRTY;
             cache_w_count++;
         }
     }else{
-//        printf("ohhhhh");
+        printf("I should not show\n");
     }
     return free_index;
 }
@@ -143,32 +153,42 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
             if (oper_style == OPERATION_WRITE)
                 caches[index].flag |= CACHE_FLAG_DIRTY;
         }else{
+            //一定是hit的load
             if (oper_style == OPERATION_LOCK){
+                cache_hit_count++;
+                //只有在LRU的时候才更新时间戳，第一次设置时间戳是在被放入数据的时候。所以符合FIFO
+                if (CACHE_SWAP_LRU == swap_style)
+                    caches[index].lru_count = tick_count;
                 lock_cache_line((_u64)index);
             }else{
+                // unlock 不计算hit
                 unlock_cache_line((_u64)index);
             }
         }
     //miss
     } else {
-        if(oper_style == OPERATION_READ || oper_style == OPERATION_WRITE){
+        if(oper_style == OPERATION_READ || oper_style == OPERATION_WRITE || oper_style == OPERATION_LOCK){
             index = get_cache_free_line(set_base);
-            // >=0 表示顺利找到了可以替换的块，否则说明全部都被锁定了。
             if(index >= 0 ){
                 set_cache_line((_u64) index, addr);
-                if (oper_style == OPERATION_READ) {
+                if (oper_style == OPERATION_READ || oper_style == OPERATION_LOCK) {
+                    if(oper_style == OPERATION_LOCK){
+                        lock_cache_line((_u64)index);
+                    }
                     cache_r_count++;
                 } else {
                     cache_w_count++;
                 }
                 cache_miss_count++;
             }else{
-                // 如果是write,而且没有知道替换的块，那就直接写回到主存，目前这里的操作被忽略。后续加上时间延迟
-                // test
-//                printf("hello");
+                //返回值应该确保是>=0的
             }
+        }else{
+            // miss的unlock先不用管
         }
         // 如果是进行lock unlock操作时miss，目前先不管，因为现在设置的策略是替换时不能替换lock状态的line
+        //Fix BUG:在将Cachesim应用到其他应用中时，发现tickcount没有增加，这里修正下。不然会导致替换算法失效。
+        tick_count++;
     }
 }
 
@@ -191,13 +211,12 @@ void CacheSim::load_trace(char *filename) {
         sscanf(buf, "%c %x", &style, &addr);
         do_cache_op(addr, style);
         switch (style) {
-            case 'l' :rcount++;tick_count++;break;
-            case 's' :wcount++;tick_count++;break;
+            case 'l' :rcount++;break;
+            case 's' :wcount++;break;
             case 'k' :                break;
             case 'u' :                break;
 
         }
-
     }
     //TODO 添加printf打印测试结果。
     // 指令统计
@@ -221,9 +240,10 @@ void CacheSim::load_trace(char *filename) {
 
 }
 
-void CacheSim::set_swap_style(int swap_style) {
-    this->swap_style = swap_style;
+void CacheSim::set_swap_style(int a_swap_style) {
+    this->swap_style = a_swap_style;
 }
+
 
 int CacheSim::lock_cache_line(_u64 line_index) {
     caches[line_index].flag |= CACHE_FLAG_LOCK;

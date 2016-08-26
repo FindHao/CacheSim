@@ -72,10 +72,10 @@ public:
     /**空闲cache line的index记录，在寻找时，返回空闲line的index*/
     _u64 cache_free_num;
 
-    CacheSim(int cache_size,int cache_line_size, int mapping_ways);
+    CacheSim(int a_cache_size,int a_cache_line_size, int a_mapping_ways);
     ~CacheSim();
 
-    void set_swap_style(int swap_style);
+    void set_swap_style(int a_swap_style);
     /**原代码中addr的处理有些问题，导致我没有成功运行他的代码。
      * 检查是否命中
      * @args:
@@ -94,9 +94,9 @@ public:
     void load_trace(char * filename);
 
     /**lock a cache line*/
-    int lock_cache_line(_u64 line_index);
+    int lock_cache_line(_u64 addr);
     /**unlock a cache line*/
-    int unlock_cache_line(_u64 line_index);
+    int unlock_cache_line(_u64 addr);
     /**@return 返回miss率*/
     double get_miss_rate(){
         return 100.0 * cache_miss_count / (cache_miss_count + cache_hit_count);
