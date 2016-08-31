@@ -11,14 +11,14 @@
 #include <cstdio>
 #include <time.h>
 #include <climits>
-
-CacheSim::CacheSim(int a_cache_size, int a_cache_line_size, int a_mapping_ways) {
+CacheSim::CacheSim() {}
+void CacheSim::init(int a_cache_size, int a_cache_line_size, int a_mapping_ways) {
 //如果输入配置不符合要求
     if (a_cache_line_size < 0 || a_mapping_ways < 1) {
         return;
     }
-    this->cache_size = (_u64) a_cache_size;
-    this->cache_line_size = (_u64) a_cache_line_size;
+    cache_size = (_u64) a_cache_size;
+    cache_line_size = (_u64) a_cache_line_size;
     // 总的line数 = cache总大小/ 每个line的大小（一般64byte，模拟的时候可配置）
     cache_line_num = (_u64) a_cache_size / a_cache_line_size;
     cache_line_shifts = (_u64) log2(a_cache_line_size);
@@ -45,7 +45,7 @@ CacheSim::CacheSim(int a_cache_size, int a_cache_line_size, int a_mapping_ways) 
 
 
     //测试时的默认配置
-    swap_style = CACHE_SWAP_RAND;
+    swap_style = CACHE_SWAP_LRU;
     srand((unsigned) time(NULL));
 }
 
@@ -133,7 +133,7 @@ void CacheSim::set_cache_line(_u64 index, _u64 addr) {
 
 void CacheSim::do_cache_op(_u64 addr, char oper_style) {
     _u64 set, set_base;
-    int index;
+    long long index;
     set = (addr >> cache_line_shifts) % cache_set_size;
     //获得组号的基地址
     set_base = set * cache_mapping_ways;
@@ -187,9 +187,10 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
             // miss的unlock先不用管
         }
         // 如果是进行lock unlock操作时miss，目前先不管，因为现在设置的策略是替换时不能替换lock状态的line
-        //Fix BUG:在将Cachesim应用到其他应用中时，发现tickcount没有增加，这里修正下。不然会导致替换算法失效。
-        tick_count++;
     }
+    //Fix BUG:在将Cachesim应用到其他应用中时，发现tickcount没有增加，这里修正下。不然会导致替换算法失效。
+    // Bug Fix: 在hm中，需要通过外部单独调用tickcount++,现在还不明白为什么。
+//    tick_count++;
 }
 
 /**从文件读取trace，在我最后的修改目标里，为了适配项目，这里需要改掉*/
@@ -210,6 +211,7 @@ void CacheSim::load_trace(char *filename) {
         _u64 addr = 0;
         sscanf(buf, "%c %x", &style, &addr);
         do_cache_op(addr, style);
+        tick_count++;
         switch (style) {
             case 'l' :rcount++;break;
             case 's' :wcount++;break;
