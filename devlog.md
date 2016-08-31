@@ -135,7 +135,8 @@ cache line 32byte ,mapping ways 8 ,cache size 64KB
 ## 星期三, 31. 八月 2016 08:48上午 
 lock早已完成。
 在加入别的项目里时，出现了很多问题，不在构造函数里初始化了，放在了init里。
-
+单独提出了reinit，因为发现当指令非常非常多时，tickcount自增，超过了_u64上限，导致替换策略的失效。因此在调用cachesim的一些地方，每次需要进行reinit。
+把tickcount自增的地方也提出来了。
 
 
 

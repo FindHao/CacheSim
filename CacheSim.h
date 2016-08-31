@@ -2,7 +2,6 @@
 // Created by find on 16-7-19.
 // cache line = cache block = 原代码里的cache item ~= cache way
 //
-
 #ifndef CACHE_SIM
 #define CACHE_SIM
 typedef unsigned char _u8;
@@ -102,6 +101,7 @@ public:
         return 100.0 * cache_miss_count / (cache_miss_count + cache_hit_count);
     }
 
+    void re_init();
 };
 
 #endif

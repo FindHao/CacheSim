@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <time.h>
 #include <climits>
+
 CacheSim::CacheSim() {}
 void CacheSim::init(int a_cache_size, int a_cache_line_size, int a_mapping_ways) {
 //如果输入配置不符合要求
@@ -49,6 +50,15 @@ void CacheSim::init(int a_cache_size, int a_cache_line_size, int a_mapping_ways)
     srand((unsigned) time(NULL));
 }
 
+/**顶部的初始化放在最一开始，如果中途需要对tick_count进行清零和caches的清空，执行此。主要因为tick_count的自增可能会超过unsigned long long，而且一旦tick_count清零，caches里的count数据也就出现了错误。*/
+void CacheSim:: re_init(){
+    tick_count = 0;
+    cache_hit_count = 0;
+    cache_miss_count = 0;
+    cache_free_num = cache_line_num;
+    memset(caches, 0, sizeof(Cache_Line) * cache_line_num);
+    memset(cache_buf, 0, this->cache_size);
+}
 CacheSim::~CacheSim() {
     free(caches);
     free(cache_buf);
@@ -137,8 +147,7 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
     set = (addr >> cache_line_shifts) % cache_set_size;
     //获得组号的基地址
     set_base = set * cache_mapping_ways;
-    //WARNING！！！
-    //这里的一个隐患，返回的超过了int上限
+    tick_count++;
     index = check_cache_hit(set_base, addr);
     //命中了
     if (index >= 0) {
@@ -211,7 +220,6 @@ void CacheSim::load_trace(char *filename) {
         _u64 addr = 0;
         sscanf(buf, "%c %x", &style, &addr);
         do_cache_op(addr, style);
-        tick_count++;
         switch (style) {
             case 'l' :rcount++;break;
             case 's' :wcount++;break;
