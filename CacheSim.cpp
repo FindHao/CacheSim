@@ -13,40 +13,44 @@
 #include <climits>
 
 CacheSim::CacheSim() {}
-void CacheSim::init(int a_cache_size, int a_cache_line_size, int a_mapping_ways) {
+void CacheSim::init(int a_cache_size[], int a_cache_line_size[], int a_mapping_ways[]) {
 //如果输入配置不符合要求
-    if (a_cache_line_size < 0 || a_mapping_ways < 1) {
+    if (a_cache_line_size < 0 || a_mapping_ways[0] < 1 || a_mapping_ways[1] < 1) {
         return;
     }
-    cache_size = (_u64) a_cache_size;
-    cache_line_size = (_u64) a_cache_line_size;
+    cache_size = (_u64 *) a_cache_size;
+    cache_line_size = (_u64 *) a_cache_line_size;
     // 总的line数 = cache总大小/ 每个line的大小（一般64byte，模拟的时候可配置）
-    cache_line_num = (_u64) a_cache_size / a_cache_line_size;
-    cache_line_shifts = (_u64) log2(a_cache_line_size);
+    cache_line_num[0] = (_u64) a_cache_size[0] / a_cache_line_size[0];
+    cache_line_num[1] = (_u64) a_cache_size[1] / a_cache_line_size[1];
+    cache_line_shifts[0] = (_u64)log2(a_cache_line_size[0]);
+    cache_line_shifts[1] = (_u64)log2(a_cache_line_size[1]);
     // 几路组相联
-    cache_mapping_ways = (_u64) a_mapping_ways;
+    cache_mapping_ways= (_u64*) a_mapping_ways;
     // 总共有多少set
-    cache_set_size = cache_line_num / a_mapping_ways;
+    cache_set_size[0] = cache_line_num[0] / cache_mapping_ways[0];
+    cache_set_size[1] = cache_line_num[1] / cache_mapping_ways[1];
     // 其二进制占用位数，同其他shifts
-    cache_set_shifts = (_u64) log2(cache_set_size);
+    cache_set_shifts[0] = (_u64) log2(cache_set_size[0]);
+    cache_set_shifts[1] = (_u64) log2(cache_set_size[1]);
     // 空闲块（line）
     cache_free_num = cache_line_num;
 
-    cache_hit_count = 0;
-    cache_miss_count = 0;
+    cache_hit_count[MAXLEVEL] = {0};
+    cache_miss_count[MAXLEVEL] = {0};
     cache_r_count = 0;
     cache_w_count = 0;
     // 指令数，主要用来在替换策略的时候提供比较的key，在命中或者miss的时候，相应line会更新自己的count为当时的tick_count;
     tick_count = 0;
-    cache_buf = (_u8 *) malloc(this->cache_size);
-    memset(cache_buf, 0, this->cache_size);
+//    cache_buf = (_u8 *) malloc(cache_size);
+//    memset(cache_buf, 0, this->cache_size);
     // 为每一行分配空间
-    caches = (Cache_Line *) malloc(sizeof(Cache_Line) * cache_line_num);
-    memset(caches, 0, sizeof(Cache_Line) * cache_line_num);
-
-
+    for (int i = 0; i < 2; ++i) {
+        caches[i] = (Cache_Line *) malloc(sizeof(Cache_Line) * cache_line_num[i]);
+        memset(caches[i], 0, sizeof(Cache_Line) * cache_line_num[i]);
+    }
     //测试时的默认配置
-    swap_style = CACHE_SWAP_LRU;
+    swap_style ={CACHE_SWAP_LRU, CACHE_SWAP_LRU};
     srand((unsigned) time(NULL));
 }
 
@@ -55,21 +59,23 @@ void CacheSim:: re_init(){
     tick_count = 0;
     cache_hit_count = 0;
     cache_miss_count = 0;
+    // 这里是复制的地址呢还是内容？应该是内容？
     cache_free_num = cache_line_num;
-    memset(caches, 0, sizeof(Cache_Line) * cache_line_num);
-    memset(cache_buf, 0, this->cache_size);
+    memset(caches[0], 0, sizeof(Cache_Line) * cache_line_num[0]);
+    memset(caches[1], 0, sizeof(Cache_Line) * cache_line_num[1]);
+//    memset(cache_buf, 0, this->cache_size);
 }
 CacheSim::~CacheSim() {
     free(caches);
-    free(cache_buf);
+//    free(cache_buf);
 }
 
-int CacheSim::check_cache_hit(_u64 set_base, _u64 addr) {
+int CacheSim::check_cache_hit(_u64 set_base, _u64 addr, char level) {
     /**循环查找当前set的所有way（line），通过tag匹配，查看当前地址是否在cache中*/
     _u64 i;
-    for (i = 0; i < cache_mapping_ways; ++i) {
-        if ((caches[set_base + i].flag & CACHE_FLAG_VALID) &&
-            (caches[set_base + i].tag == ((addr >> (cache_set_shifts + cache_line_shifts))))) {
+    for (i = 0; i < cache_mapping_ways[level]; ++i) {
+        if ((caches[level][set_base + i].flag & CACHE_FLAG_VALID) &&
+            (caches[level][set_base + i].tag == ((addr >> (cache_set_shifts[level] + cache_line_shifts[level]))))) {
             return set_base + i;
         }
     }
@@ -77,15 +83,15 @@ int CacheSim::check_cache_hit(_u64 set_base, _u64 addr) {
 }
 
 /**获取当前set中可用的line，如果没有，就找到要被替换的块*/
-int CacheSim::get_cache_free_line(_u64 set_base) {
+int CacheSim::get_cache_free_line(_u64 set_base, char level) {
     _u64 i, min_count, j;
     int free_index;
     /**从当前cache set里找可用的空闲line，可用：脏数据，空闲数据
      * cache_free_num是统计的整个cache的可用块*/
-    for (i = 0; i < cache_mapping_ways; ++i) {
-        if (!(caches[set_base + i].flag & CACHE_FLAG_VALID)) {
-            if (cache_free_num > 0)
-                cache_free_num--;
+    for (i = 0; i < cache_mapping_ways[level]; ++i) {
+        if (!(caches[level][set_base + i].flag & CACHE_FLAG_VALID)) {
+            if (cache_free_num[level] > 0)
+                cache_free_num[level]--;
             return set_base + i;
         }
     }
@@ -133,7 +139,7 @@ int CacheSim::get_cache_free_line(_u64 set_base) {
 void CacheSim::set_cache_line(_u64 index, _u64 addr) {
     Cache_Line *line = caches + index;
     // 这里每个line的buf和整个cache类的buf是重复的而且并没有填充内容。
-    line->buf = cache_buf + cache_line_size * index;
+//    line->buf = cache_buf + cache_line_size * index;
     // 更新这个line的tag位
     line->tag = addr >> (cache_set_shifts + cache_line_shifts);
     line->flag = (_u8) ~CACHE_FLAG_MASK;

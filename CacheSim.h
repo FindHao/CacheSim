@@ -11,7 +11,8 @@ const unsigned char CACHE_FLAG_VALID = 0x01;
 const unsigned char CACHE_FLAG_DIRTY = 0x02;
 const unsigned char CACHE_FLAG_LOCK = 0x04;
 const unsigned char CACHE_FLAG_MASK = 0xff;
-
+/**最多多少层cache*/
+const int MAXLEVEL = 3;
 const char OPERATION_READ = 'l';
 const char OPERATION_WRITE = 's';
 const char OPERATION_LOCK = 'k';
@@ -42,49 +43,51 @@ class CacheSim {
     // 隐患
 public:
     /**cache的总大小，单位byte*/
-    _u64 cache_size;
+    _u64 cache_size[MAXLEVEL];
     /**cache line(Cache block)cache块的大小*/
-    _u64 cache_line_size;
+    _u64 cache_line_size[MAXLEVEL];
     /**总的行数*/
-    _u64 cache_line_num;
+    _u64 cache_line_num[MAXLEVEL];
     /**每个set有多少way*/
-    _u64 cache_mapping_ways;
+    _u64 cache_mapping_ways[MAXLEVEL];
     /**整个cache有多少组*/
-    _u64 cache_set_size;
+    _u64 cache_set_size[MAXLEVEL];
     /**2的多少次方是set的数量，用于匹配地址时，进行位移比较*/
-    _u64 cache_set_shifts;
+    _u64 cache_set_shifts[MAXLEVEL];
     /**2的多少次方是line的长度，用于匹配地址*/
-    _u64 cache_line_shifts;
-    /**真正的cache地址列*/
-    Cache_Line *caches;
+    _u64 cache_line_shifts[MAXLEVEL];
+    /**真正的cache地址列。指针数组*/
+    Cache_Line *caches[MAXLEVEL];
 
     /**指令计数器*/
     _u64 tick_count;
-    /**cache缓冲区*/
-    _u8 *cache_buf;
+    /**cache缓冲区,由于并没有数据*/
+//    _u8 *cache_buf[MAXLEVEL];
     /**缓存替换算法*/
-    int swap_style;
+    int swap_style[MAXLEVEL];
     /**读写内存的计数*/
     _u64 cache_r_count, cache_w_count;
     /**cache hit和miss的计数*/
-    _u64 cache_hit_count, cache_miss_count;
+    _u64 cache_hit_count[MAXLEVEL], cache_miss_count[MAXLEVEL];
     /**空闲cache line的index记录，在寻找时，返回空闲line的index*/
-    _u64 cache_free_num;
+    _u64 cache_free_num[MAXLEVEL];
 
     CacheSim();
     ~CacheSim();
-    void init(int a_cache_size,int a_cache_line_size, int a_mapping_ways);
-    void set_swap_style(int a_swap_style);
+    void init(int a_cache_size[],int a_cache_line_size[], int a_mapping_ways[]);
+    void set_swap_style(int a_swap_style[]);
     /**原代码中addr的处理有些问题，导致我没有成功运行他的代码。
      * 检查是否命中
      * @args:
      * cache: 模拟的cache
      * set_base: 当前地址属于哪一个set，其基址是什么。
      * addr: 要判断的内存地址
+     * @return:
+     * 由于cache的地址肯定不会超过int（因为cache大小决定的）
      * TODO: check the addr */
-    int check_cache_hit(_u64 set_base, _u64 addr);
+    int check_cache_hit(_u64 set_base, _u64 addr, char level);
     /**获取cache当前set中空余的line*/
-    int get_cache_free_line(_u64 set_base);
+    int get_cache_free_line(_u64 set_base, char level);
     /**找到合适的line之后，将数据写入cache line中*/
     void set_cache_line(_u64 index, _u64 addr);
     /**对一个指令进行分析*/
@@ -97,8 +100,8 @@ public:
     /**unlock a cache line*/
     int unlock_cache_line(_u64 addr);
     /**@return 返回miss率*/
-    double get_miss_rate(){
-        return 100.0 * cache_miss_count / (cache_miss_count + cache_hit_count);
+    double get_miss_rate(int level){
+        return 100.0 * cache_miss_count[level] / (cache_miss_count[level] + cache_hit_count[level]);
     }
 
     void re_init();
