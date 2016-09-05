@@ -98,15 +98,15 @@ int CacheSim::get_cache_free_line(_u64 set_base, char level) {
     /**没有可用line，则执行替换算法
      * lock状态的块如何处理？？*/
     free_index = -1;
-    if (swap_style == CACHE_SWAP_RAND) {
+    if (swap_style[level] == CACHE_SWAP_RAND) {
         // TODO: 随机替换Lock状态的line后面再改
-        free_index = rand() % cache_mapping_ways;
+        free_index = rand() % cache_mapping_ways[level];
     } else {
         // !!!BUG Fixed
         min_count = UINT_MAX;
-        for (j = 0; j < cache_mapping_ways; ++j) {
-            if (caches[set_base + j].count < min_count && !(caches[set_base + j].flag &CACHE_FLAG_LOCK)) {
-                min_count = caches[set_base + j].count;
+        for (j = 0; j < cache_mapping_ways[level]; ++j) {
+            if (caches[level][set_base + j].count < min_count && !(caches[level][set_base + j].flag &CACHE_FLAG_LOCK)) {
+                min_count = caches[level][set_base + j].count;
                 free_index = j;
             }
         }
@@ -114,9 +114,9 @@ int CacheSim::get_cache_free_line(_u64 set_base, char level) {
     if(free_index < 0){
         //如果全部被锁定了，应该会走到这里来。那么强制进行替换。强制替换的时候，需要setline?
         min_count = UINT_MAX;
-        for (j = 0; j < cache_mapping_ways; ++j) {
-            if (caches[set_base + j].count < min_count) {
-                min_count = caches[set_base + j].count;
+        for (j = 0; j < cache_mapping_ways[level]; ++j) {
+            if (caches[level][set_base + j].count < min_count) {
+                min_count = caches[level][set_base + j].count;
                 free_index = j;
             }
         }
@@ -125,8 +125,8 @@ int CacheSim::get_cache_free_line(_u64 set_base, char level) {
     if(free_index >= 0){
         free_index += set_base;
         //如果原有的cache line是脏数据，标记脏位
-        if (caches[free_index].flag & CACHE_FLAG_DIRTY) {
-            caches[free_index].flag &= ~CACHE_FLAG_DIRTY;
+        if (caches[level][free_index].flag & CACHE_FLAG_DIRTY) {
+            caches[level][free_index].flag &= ~CACHE_FLAG_DIRTY;
             cache_w_count++;
         }
     }else{
@@ -136,37 +136,73 @@ int CacheSim::get_cache_free_line(_u64 set_base, char level) {
 }
 
 /**将数据写入cache line*/
-void CacheSim::set_cache_line(_u64 index, _u64 addr) {
-    Cache_Line *line = caches + index;
+void CacheSim::set_cache_line(_u64 index, _u64 addr, char level) {
+    Cache_Line *line = caches[level] + index;
     // 这里每个line的buf和整个cache类的buf是重复的而且并没有填充内容。
 //    line->buf = cache_buf + cache_line_size * index;
     // 更新这个line的tag位
-    line->tag = addr >> (cache_set_shifts + cache_line_shifts);
+    line->tag = addr >> (cache_set_shifts[level] + cache_line_shifts[level]);
     line->flag = (_u8) ~CACHE_FLAG_MASK;
     line->flag |= CACHE_FLAG_VALID;
     line->count = tick_count;
 }
 
+/**不需要分level*/
 void CacheSim::do_cache_op(_u64 addr, char oper_style) {
     _u64 set, set_base;
     long long index;
-    set = (addr >> cache_line_shifts) % cache_set_size;
-    //获得组号的基地址
-    set_base = set * cache_mapping_ways;
     tick_count++;
-    index = check_cache_hit(set_base, addr);
-    //命中了
+    // lock操作现在只关心L2的。
+    if(oper_style == OPERATION_LOCK || oper_style == OPERATION_UNLOCK){
+        set = (addr >> cache_line_shifts[1]) % cache_set_size[1];
+        set_base = set * cache_mapping_ways[1];
+        index = check_cache_hit(set_base, addr, 1);
+        if(index >= 0){
+            if(oper_style == OPERATION_LOCK){
+                cache_hit_count[1]++;
+                if(CACHE_SWAP_LRU == swap_style[1]){
+                    caches[1][index].lru_count = tick_count;
+                }
+                lock_cache_line((_u64)index);
+            }else{
+                unlock_cache_line((_u64)index);
+            }
+        }else{
+            // lock miss
+            if(oper_style == OPERATION_LOCK){
+                index = get_cache_free_line(set_base, 1);
+                if(index >= 0 ){
+                    set_cache_line((_u64) index, addr, 1);
+                    lock_cache_line((_u64) index);
+                    cache_miss_count[1]++;
+                }else{
+                    //返回值应该确保是>=0的
+                    printf("I should not be here.");
+                }
+            }else{
+                // miss的unlock 先不管
+            }
+
+    }
+    // 先在L1中搜索
+    set = (addr >> cache_line_shifts[0]) % cache_set_size[0];
+    //获得组号的基地址
+    set_base = set * cache_mapping_ways[0];
+    // 检查L1
+    index = check_cache_hit(set_base, addr, 0);
+    // L1命中了
     if (index >= 0) {
         // lock和unlock的指令不算在其内
         if (oper_style == OPERATION_READ || oper_style == OPERATION_WRITE){
             cache_hit_count++;
             //只有在LRU的时候才更新时间戳，第一次设置时间戳是在被放入数据的时候。所以符合FIFO
-            if (CACHE_SWAP_LRU == swap_style)
-                caches[index].lru_count = tick_count;
+            if (CACHE_SWAP_LRU == swap_style[0])
+                caches[0][index].lru_count = tick_count;
             //直接默认配置为写回法，即要替换或者数据脏了的时候才写回。
             //命中了，如果是改数据，不直接写回，而是等下次，即没有命中，但是恰好匹配到了当前line的时候，这时的标记就起作用了，将数据写回内存
+            //先不用考虑写回的问题，这里按设想，不应该直接从L1写回到内存
             if (oper_style == OPERATION_WRITE)
-                caches[index].flag |= CACHE_FLAG_DIRTY;
+                caches[0][index].flag |= CACHE_FLAG_DIRTY;
         }else{
             //一定是hit的load
             if (oper_style == OPERATION_LOCK){

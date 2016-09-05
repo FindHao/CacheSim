@@ -89,7 +89,7 @@ public:
     /**获取cache当前set中空余的line*/
     int get_cache_free_line(_u64 set_base, char level);
     /**找到合适的line之后，将数据写入cache line中*/
-    void set_cache_line(_u64 index, _u64 addr);
+    void set_cache_line(_u64 index, _u64 addr, char level);
     /**对一个指令进行分析*/
     void do_cache_op(_u64 addr, char oper_style);
     /**读入trace文件*/
