@@ -149,48 +149,56 @@ void CacheSim::set_cache_line(_u64 index, _u64 addr, char level) {
 
 /**不需要分level*/
 void CacheSim::do_cache_op(_u64 addr, char oper_style) {
-    _u64 set, set_base;
-    long long index;
+    _u64 set_l1, set_l2, set_base_l1,set_base_l2;
+    long long hit_index_l1, hit_index_l2, free_index_l1, free_index_l2;
     tick_count++;
+
+    if(oper_style == OPERATION_READ) cache_r_count++;
+    if(oper_style == OPERATION_WRITE) cache_w_count++;
+    set_l2 = (addr >> cache_line_shifts[1]) % cache_set_size[1];
+    set_base_l2 = set_l2 * cache_mapping_ways[1];
+    hit_index_l2 = check_cache_hit(set_base_l2, addr, 1);
+    set_l1 = (addr >> cache_line_shifts[0]) % cache_set_size[0];
+    set_base_l1 = set_l1 * cache_mapping_ways[0];
+    hit_index_l1 = check_cache_hit(set_base_l1, addr, 0);
     // lock操作现在只关心L2的。
     if(oper_style == OPERATION_LOCK || oper_style == OPERATION_UNLOCK){
-        set = (addr >> cache_line_shifts[1]) % cache_set_size[1];
-        set_base = set * cache_mapping_ways[1];
-        index = check_cache_hit(set_base, addr, 1);
-        if(index >= 0){
+        if(hit_index_l2 >= 0){
             if(oper_style == OPERATION_LOCK){
                 cache_hit_count[1]++;
                 if(CACHE_SWAP_LRU == swap_style[1]){
-                    caches[1][index].lru_count = tick_count;
+                    caches[1][hit_index_l2].lru_count = tick_count;
                 }
-                lock_cache_line((_u64)index);
-                //还需要填充到L1上
-                set = (addr >> cache_line_shifts[0]) % cache_set_size[0];
-                set_base = set * cache_mapping_ways[0];
+                lock_cache_line((_u64)hit_index_l2);
                 // 如果L1miss，则一定需要加载上去
-                if( check_cache_hit(set_base, addr, 0) < 0 ){
-                    index = get_cache_free_line(set_base, 0);
-                    if(index >= 0){
-                        set_cache_line((_u64)index, addr, 0);
+                if( hit_index_l1 < 0 ){
+                    free_index_l1 = get_cache_free_line(set_base_l1, 0);
+                    if(free_index_l1 >= 0){
+                        set_cache_line((_u64)free_index_l1, addr, 0);
                         //需要miss++吗？
+                    }else{
+                        printf("I should not be here");
                     }
                 }
             }else{
-                unlock_cache_line((_u64)index);
+                unlock_cache_line((_u64)free_index_l2);
             }
         }else {
             // lock miss
             if (oper_style == OPERATION_LOCK) {
-                index = get_cache_free_line(set_base, 1);
-                if (index >= 0) {
-                    set_cache_line((_u64) index, addr, 1);
-                    lock_cache_line((_u64) index);
-                    cache_miss_count[1]++;
-                    if( check_cache_hit(set_base, addr, 0) < 0 ){
-                        index = get_cache_free_line(set_base, 0);
-                        if(index >= 0){
-                            set_cache_line((_u64)index, addr, 0);
+                cache_miss_count[1]++;
+                free_index_l2 = get_cache_free_line(set_base_l2, 1);
+                if (free_index_l2 >= 0) {
+                    set_cache_line((_u64) free_index_l2, addr, 1);
+                    lock_cache_line((_u64) free_index_l2);
+                    // 同时需要查看L1是否hit
+                    if(hit_index_l1 < 0){
+                        free_index_l1 = get_cache_free_line(set_base_l1, 0);
+                        if(free_index_l1 >= 0){
+                            set_cache_line((_u64)free_index_l1, addr, 0);
                             //需要miss++吗？
+                        }else{
+                            printf("I should not be here.");
                         }
                     }
                 } else {
@@ -217,15 +225,20 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                 caches[0][index].lru_count = tick_count;
             //直接默认配置为写回法，即要替换或者数据脏了的时候才写回。
             //命中了，如果是改数据，不直接写回，而是等下次，即没有命中，但是恰好匹配到了当前line的时候，这时的标记就起作用了，将数据写回内存
-            //先不用考虑写回的问题，这里按设想，不应该直接从L1写回到内存
+            //TODO: error :先不用考虑写回的问题，这里按设想，不应该直接从L1写回到内存
             if (oper_style == OPERATION_WRITE)
                 caches[0][index].flag |= CACHE_FLAG_DIRTY;
         } else {
             // L1 miss
             // 先查看L2是否hit，如果hit，直接取数据上来，否则
-            index = get_cache_free_line(set_base, );
+            set = (addr >> cache_line_shifts[1]) % cache_set_size[1];
+            set_base = set * cache_mapping_ways[1];
+            index = check_cache_hit(set_base, addr, 1);
             if(index >= 0 ){
-                set_cache_line((_u64) index, addr);
+                // 在L2中hit, 需要写回到L1中
+                cache_hit_count[1]++;
+
+                set_cache_line((_u64) index, addr, 1);
                 if (oper_style == OPERATION_READ || oper_style == OPERATION_LOCK) {
                     if(oper_style == OPERATION_LOCK){
                         lock_cache_line((_u64)index);
@@ -236,7 +249,7 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                 }
                 cache_miss_count++;
             }else{
-                //返回值应该确保是>=0的
+                // not in L2
             }
         }
         //Fix BUG:在将Cachesim应用到其他应用中时，发现tickcount没有增加，这里修正下。不然会导致替换算法失效。
