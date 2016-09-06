@@ -164,37 +164,54 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                     caches[1][index].lru_count = tick_count;
                 }
                 lock_cache_line((_u64)index);
+                //还需要填充到L1上
+                set = (addr >> cache_line_shifts[0]) % cache_set_size[0];
+                set_base = set * cache_mapping_ways[0];
+                // 如果L1miss，则一定需要加载上去
+                if( check_cache_hit(set_base, addr, 0) < 0 ){
+                    index = get_cache_free_line(set_base, 0);
+                    if(index >= 0){
+                        set_cache_line((_u64)index, addr, 0);
+                        //需要miss++吗？
+                    }
+                }
             }else{
                 unlock_cache_line((_u64)index);
             }
-        }else{
+        }else {
             // lock miss
-            if(oper_style == OPERATION_LOCK){
+            if (oper_style == OPERATION_LOCK) {
                 index = get_cache_free_line(set_base, 1);
-                if(index >= 0 ){
+                if (index >= 0) {
                     set_cache_line((_u64) index, addr, 1);
                     lock_cache_line((_u64) index);
                     cache_miss_count[1]++;
-                }else{
+                    if( check_cache_hit(set_base, addr, 0) < 0 ){
+                        index = get_cache_free_line(set_base, 0);
+                        if(index >= 0){
+                            set_cache_line((_u64)index, addr, 0);
+                            //需要miss++吗？
+                        }
+                    }
+                } else {
                     //返回值应该确保是>=0的
                     printf("I should not be here.");
                 }
-            }else{
+            } else {
                 // miss的unlock 先不管
             }
-
-    }
-    // 先在L1中搜索
-    set = (addr >> cache_line_shifts[0]) % cache_set_size[0];
-    //获得组号的基地址
-    set_base = set * cache_mapping_ways[0];
-    // 检查L1
-    index = check_cache_hit(set_base, addr, 0);
-    // L1命中了
-    if (index >= 0) {
-        // lock和unlock的指令不算在其内
-        if (oper_style == OPERATION_READ || oper_style == OPERATION_WRITE){
-            cache_hit_count++;
+        }
+    }else{
+        // 对于正常的load和store先在L1中搜索
+        set = (addr >> cache_line_shifts[0]) % cache_set_size[0];
+        //获得组号的基地址
+        set_base = set * cache_mapping_ways[0];
+        // 检查L1
+        index = check_cache_hit(set_base, addr, 0);
+        // L1命中了
+        if (index >= 0) {
+            // 一定是read或者write。lock的已经在前面处理过了。
+            cache_hit_count[0]++;
             //只有在LRU的时候才更新时间戳，第一次设置时间戳是在被放入数据的时候。所以符合FIFO
             if (CACHE_SWAP_LRU == swap_style[0])
                 caches[0][index].lru_count = tick_count;
@@ -203,23 +220,10 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
             //先不用考虑写回的问题，这里按设想，不应该直接从L1写回到内存
             if (oper_style == OPERATION_WRITE)
                 caches[0][index].flag |= CACHE_FLAG_DIRTY;
-        }else{
-            //一定是hit的load
-            if (oper_style == OPERATION_LOCK){
-                cache_hit_count++;
-                //只有在LRU的时候才更新时间戳，第一次设置时间戳是在被放入数据的时候。所以符合FIFO
-                if (CACHE_SWAP_LRU == swap_style)
-                    caches[index].lru_count = tick_count;
-                lock_cache_line((_u64)index);
-            }else{
-                // unlock 不计算hit
-                unlock_cache_line((_u64)index);
-            }
-        }
-    //miss
-    } else {
-        if(oper_style == OPERATION_READ || oper_style == OPERATION_WRITE || oper_style == OPERATION_LOCK){
-            index = get_cache_free_line(set_base);
+        } else {
+            // L1 miss
+            // 先查看L2是否hit，如果hit，直接取数据上来，否则
+            index = get_cache_free_line(set_base, );
             if(index >= 0 ){
                 set_cache_line((_u64) index, addr);
                 if (oper_style == OPERATION_READ || oper_style == OPERATION_LOCK) {
@@ -234,14 +238,11 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
             }else{
                 //返回值应该确保是>=0的
             }
-        }else{
-            // miss的unlock先不用管
         }
-        // 如果是进行lock unlock操作时miss，目前先不管，因为现在设置的策略是替换时不能替换lock状态的line
-    }
-    //Fix BUG:在将Cachesim应用到其他应用中时，发现tickcount没有增加，这里修正下。不然会导致替换算法失效。
-    // Bug Fix: 在hm中，需要通过外部单独调用tickcount++,现在还不明白为什么。
+        //Fix BUG:在将Cachesim应用到其他应用中时，发现tickcount没有增加，这里修正下。不然会导致替换算法失效。
+        // Bug Fix: 在hm中，需要通过外部单独调用tickcount++,现在还不明白为什么。
 //    tick_count++;
+    }
 }
 
 /**从文件读取trace，在我最后的修改目标里，为了适配项目，这里需要改掉*/
