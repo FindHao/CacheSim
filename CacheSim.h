@@ -74,8 +74,7 @@ public:
 
     CacheSim();
     ~CacheSim();
-    void init(int a_cache_size[],int a_cache_line_size[], int a_mapping_ways[]);
-    void set_swap_style(int a_swap_style[]);
+    void init(_u64 a_cache_size[],_u64 a_cache_line_size[], _u64 a_mapping_ways[]);
     /**原代码中addr的处理有些问题，导致我没有成功运行他的代码。
      * 检查是否命中
      * @args:
@@ -96,9 +95,9 @@ public:
     void load_trace(char * filename);
 
     /**lock a cache line*/
-    int lock_cache_line(_u64 addr);
+    int lock_cache_line(_u64 addr, char level);
     /**unlock a cache line*/
-    int unlock_cache_line(_u64 addr);
+    int unlock_cache_line(_u64 addr, char level);
     /**@return 返回miss率*/
     double get_miss_rate(int level){
         return 100.0 * cache_miss_count[level] / (cache_miss_count[level] + cache_hit_count[level]);
