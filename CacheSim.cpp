@@ -56,6 +56,7 @@ void CacheSim::init(_u64 a_cache_size[3], _u64 a_cache_line_size[3], _u64 a_mapp
     //测试时的默认配置
     swap_style[0] = CACHE_SWAP_LRU;
     swap_style[1] = CACHE_SWAP_LRU;
+    re_init();
     srand((unsigned) time(NULL));
 }
 
@@ -133,6 +134,7 @@ int CacheSim::get_cache_free_line(_u64 set_base, char level) {
         free_index += set_base;
         //如果原有的cache line是脏数据，标记脏位
         if (caches[level][free_index].flag & CACHE_FLAG_DIRTY) {
+            // TODO: 写回到L2 cache中。
             caches[level][free_index].flag &= ~CACHE_FLAG_DIRTY;
             cache_w_count++;
         }
@@ -176,16 +178,17 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                     caches[1][hit_index_l2].lru_count = tick_count;
                 }
                 lock_cache_line((_u64)hit_index_l2, 1);
+                // TODO: 不加载到L1上
                 // 如果L1miss，则一定需要加载上去
-                if( hit_index_l1 < 0 ){
-                    free_index_l1 = get_cache_free_line(set_base_l1, 0);
-                    if(free_index_l1 >= 0){
-                        set_cache_line((_u64)free_index_l1, addr, 0);
-                        //需要miss++吗？
-                    }else{
-                        printf("I should not be here");
-                    }
-                }
+//                if( hit_index_l1 < 0 ){
+//                    free_index_l1 = get_cache_free_line(set_base_l1, 0);
+//                    if(free_index_l1 >= 0){
+//                        set_cache_line((_u64)free_index_l1, addr, 0);
+//                        //需要miss++吗？
+//                    }else{
+//                        printf("I should not be here");
+//                    }
+//                }
             }else{
                 unlock_cache_line((_u64)free_index_l2, 1);
             }
@@ -197,16 +200,17 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                 if (free_index_l2 >= 0) {
                     set_cache_line((_u64) free_index_l2, addr, 1);
                     lock_cache_line((_u64) free_index_l2, 1);
+                    // TODO: 不管L1
                     // 同时需要查看L1是否hit
-                    if(hit_index_l1 < 0){
-                        free_index_l1 = get_cache_free_line(set_base_l1, 0);
-                        if(free_index_l1 >= 0){
-                            set_cache_line((_u64)free_index_l1, addr, 0);
-                            //需要miss++吗？
-                        }else{
-                            printf("I should not be here.");
-                        }
-                    }
+//                    if(hit_index_l1 < 0){
+//                        free_index_l1 = get_cache_free_line(set_base_l1, 0);
+//                        if(free_index_l1 >= 0){
+//                            set_cache_line((_u64)free_index_l1, addr, 0);
+//                            //需要miss++吗？
+//                        }else{
+//                            printf("I should not be here.");
+//                        }
+//                    }
                 } else {
                     //返回值应该确保是>=0的
                     printf("I should not be here.");
@@ -226,8 +230,19 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
             //直接默认配置为写回法，即要替换或者数据脏了的时候才写回。
             //命中了，如果是改数据，不直接写回，而是等下次，即没有命中，但是恰好匹配到了当前line的时候，这时的标记就起作用了，将数据写回内存
             //TODO: error :先不用考虑写回的问题，这里按设想，不应该直接从L1写回到内存
-            if (oper_style == OPERATION_WRITE)
-                caches[0][hit_index_l1].flag |= CACHE_FLAG_DIRTY;
+            if (oper_style == OPERATION_WRITE) {
+                // 修正上面的问题
+//                caches[0][hit_index_l1].flag |= CACHE_FLAG_DIRTY;
+                // L2命中，则将新数据写入到L2
+                if(hit_index_l2 >= 0){
+                    caches[1][hit_index_l2].flag |= CACHE_FLAG_DIRTY;
+                //如果L2miss，那么找到一个新块，将数据写入L2
+                }else{
+                     //需要添加cache2 miss count吗？先不加了
+                    free_index_l2 = get_cache_free_line(set_base_l2, 1);
+                    set_cache_line((_u64) free_index_l2, addr, 1);
+                }
+            }
         } else {
             // L1 miss
             cache_miss_count[0]++;
@@ -239,7 +254,6 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                 set_cache_line((_u64) free_index_l1, addr, 0);
             }else{
                 // not in L2,从内存中取
-                // TODO: warning 这里的miss真的需要吗？？？？？
                 cache_miss_count[1]++;
                 free_index_l2 = get_cache_free_line(set_base_l2, 1);
                 set_cache_line((_u64) free_index_l2, addr, 1);
@@ -279,7 +293,6 @@ void CacheSim::load_trace(char *filename) {
 
         }
     }
-    //TODO 添加printf打印测试结果。
     // 指令统计
     printf("all r/w/sum: %lld %lld %lld \nread rate: %f%%\twrite rate: %f%%\n",
            rcount, wcount, tick_count,
