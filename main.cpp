@@ -42,7 +42,7 @@ int main(int argc, char * argv[]) {
         strcat(test_case, "gcc.trace");
     }
 //    int line_size[] = {8, 16, 32, 64, 128};
-    _u64 line_size[] = {32, 64};
+    _u64 line_size[] = {32,32 };
     _u64 ways[] = {8,8};
 //    int ways[] = {8};
 //    int cache_size[] = {0x800,0x1000,0x2000,0x4000,0x8000,0x10000,0x20000,0x40000,0x80000};

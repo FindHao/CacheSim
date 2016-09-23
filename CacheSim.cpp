@@ -40,8 +40,6 @@ void CacheSim::init(_u64 a_cache_size[3], _u64 a_cache_line_size[3], _u64 a_mapp
     cache_free_num[0] = cache_line_num[0];
     cache_free_num[1] = cache_line_num[1];
 
-    cache_hit_count[MAXLEVEL] = {0};
-    cache_miss_count[MAXLEVEL] = {0};
     cache_r_count = 0;
     cache_w_count = 0;
     // 指令数，主要用来在替换策略的时候提供比较的key，在命中或者miss的时候，相应line会更新自己的count为当时的tick_count;
@@ -65,7 +63,6 @@ void CacheSim:: re_init(){
     tick_count = 0;
     memset(cache_hit_count,0,sizeof(cache_hit_count));
     memset(cache_miss_count,0,sizeof(cache_miss_count));
-    // 这里是复制的地址呢还是内容？应该是内容？
     cache_free_num[0] = cache_line_num[0];
     cache_free_num[1] = cache_line_num[1];
     memset(caches[0], 0, sizeof(Cache_Line) * cache_line_num[0]);
@@ -78,7 +75,7 @@ CacheSim::~CacheSim() {
 //    free(cache_buf);
 }
 
-int CacheSim::check_cache_hit(_u64 set_base, _u64 addr, char level) {
+int CacheSim::check_cache_hit(_u64 set_base, _u64 addr, int level) {
     /**循环查找当前set的所有way（line），通过tag匹配，查看当前地址是否在cache中*/
     _u64 i;
     for (i = 0; i < cache_mapping_ways[level]; ++i) {
@@ -91,7 +88,7 @@ int CacheSim::check_cache_hit(_u64 set_base, _u64 addr, char level) {
 }
 
 /**获取当前set中可用的line，如果没有，就找到要被替换的块*/
-int CacheSim::get_cache_free_line(_u64 set_base, char level) {
+int CacheSim::get_cache_free_line(_u64 set_base, int level) {
     _u64 i, min_count, j;
     int free_index;
     /**从当前cache set里找可用的空闲line，可用：脏数据，空闲数据
@@ -111,7 +108,7 @@ int CacheSim::get_cache_free_line(_u64 set_base, char level) {
         free_index = rand() % cache_mapping_ways[level];
     } else {
         // !!!BUG Fixed
-        min_count = UINT_MAX;
+        min_count = ULONG_LONG_MAX;
         for (j = 0; j < cache_mapping_ways[level]; ++j) {
             if (caches[level][set_base + j].count < min_count && !(caches[level][set_base + j].flag &CACHE_FLAG_LOCK)) {
                 min_count = caches[level][set_base + j].count;
@@ -121,7 +118,7 @@ int CacheSim::get_cache_free_line(_u64 set_base, char level) {
     }
     if(free_index < 0){
         //如果全部被锁定了，应该会走到这里来。那么强制进行替换。强制替换的时候，需要setline?
-        min_count = UINT_MAX;
+        min_count = ULONG_LONG_MAX;
         for (j = 0; j < cache_mapping_ways[level]; ++j) {
             if (caches[level][set_base + j].count < min_count) {
                 min_count = caches[level][set_base + j].count;
@@ -145,7 +142,7 @@ int CacheSim::get_cache_free_line(_u64 set_base, char level) {
 }
 
 /**将数据写入cache line*/
-void CacheSim::set_cache_line(_u64 index, _u64 addr, char level) {
+void CacheSim::set_cache_line(_u64 index, _u64 addr, int level) {
     Cache_Line *line = caches[level] + index;
     // 这里每个line的buf和整个cache类的buf是重复的而且并没有填充内容。
 //    line->buf = cache_buf + cache_line_size * index;
@@ -190,7 +187,7 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
 //                    }
 //                }
             }else{
-                unlock_cache_line((_u64)free_index_l2, 1);
+                unlock_cache_line((_u64)hit_index_l2, 1);
             }
         }else {
             // lock miss
@@ -235,10 +232,12 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
 //                caches[0][hit_index_l1].flag |= CACHE_FLAG_DIRTY;
                 // L2命中，则将新数据写入到L2
                 if(hit_index_l2 >= 0){
+                    cache_hit_count[1]++;
                     caches[1][hit_index_l2].flag |= CACHE_FLAG_DIRTY;
                 //如果L2miss，那么找到一个新块，将数据写入L2
                 }else{
                      //需要添加cache2 miss count吗？先不加了
+                    cache_miss_count[1]++;
                     free_index_l2 = get_cache_free_line(set_base_l2, 1);
                     set_cache_line((_u64) free_index_l2, addr, 1);
                 }
@@ -320,12 +319,12 @@ void CacheSim::load_trace(char *filename) {
 
 
 
-int CacheSim::lock_cache_line(_u64 line_index, char level) {
+int CacheSim::lock_cache_line(_u64 line_index, int level) {
     caches[level][line_index].flag |= CACHE_FLAG_LOCK;
     return 0;
 }
 
-int CacheSim::unlock_cache_line(_u64 line_index, char level) {
+int CacheSim::unlock_cache_line(_u64 line_index, int level) {
     caches[level][line_index].flag &= ~CACHE_FLAG_LOCK;
     return 0;
 }

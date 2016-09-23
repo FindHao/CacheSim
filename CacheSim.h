@@ -84,20 +84,20 @@ public:
      * @return:
      * 由于cache的地址肯定不会超过int（因为cache大小决定的）
      * TODO: check the addr */
-    int check_cache_hit(_u64 set_base, _u64 addr, char level);
+    int check_cache_hit(_u64 set_base, _u64 addr, int level);
     /**获取cache当前set中空余的line*/
-    int get_cache_free_line(_u64 set_base, char level);
+    int get_cache_free_line(_u64 set_base, int level);
     /**找到合适的line之后，将数据写入cache line中*/
-    void set_cache_line(_u64 index, _u64 addr, char level);
+    void set_cache_line(_u64 index, _u64 addr, int level);
     /**对一个指令进行分析*/
     void do_cache_op(_u64 addr, char oper_style);
     /**读入trace文件*/
     void load_trace(char * filename);
 
     /**lock a cache line*/
-    int lock_cache_line(_u64 addr, char level);
+    int lock_cache_line(_u64 addr, int level);
     /**unlock a cache line*/
-    int unlock_cache_line(_u64 addr, char level);
+    int unlock_cache_line(_u64 addr, int level);
     /**@return 返回miss率*/
     double get_miss_rate(int level){
         return 100.0 * cache_miss_count[level] / (cache_miss_count[level] + cache_hit_count[level]);

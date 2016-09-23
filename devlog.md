@@ -137,8 +137,22 @@ lock早已完成。
 在加入别的项目里时，出现了很多问题，不在构造函数里初始化了，放在了init里。
 单独提出了reinit，因为发现当指令非常非常多时，tickcount自增，超过了_u64上限，导致替换策略的失效。因此在调用cachesim的一些地方，每次需要进行reinit。
 把tickcount自增的地方也提出来了。
+## 星期一, 19. 九月 2016 07:26下午 
+应该是re_init没有调用导致的L2的miss很低很低。
+gcc.trace
+all r/w/sum: 318197 197486 515683 
+read rate: 61.703993%	write rate: 38.296007%
+L1 miss/hit: 6651/509032	 hit rate: 98.710254%/1.289746%
+L2 miss/hit: 3373/3278	 hit rate: 49.285822%/50.714178%
+ mcf.trace
+all r/w/sum: 5972 721258 727230 
+read rate: 0.821198%	write rate: 99.178802%
+L1 miss/hit: 180081/547149	 hit rate: 75.237408%/24.762592%
+L2 miss/hit: 90118/89963	 hit rate: 49.956964%/50.043036%
 
-
+Process finished with exit code 0
+## 星期五, 23. 九月 2016 03:22下午 
+修正L1的脏数据写回问题，修正查找free cache line时，初始最小值为UINT_MAX问题。
 
 
 
