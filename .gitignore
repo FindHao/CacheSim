@@ -76,3 +76,4 @@ fabric.properties
 # FindHao add:
 .idea/*
 input
+cmake-build-debug/*

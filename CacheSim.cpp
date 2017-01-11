@@ -299,11 +299,11 @@ void CacheSim::load_trace(char *filename) {
            100.0 * wcount / tick_count
     );
     // miss率
-    printf("L1 miss/hit: %lld/%lld\t hit rate: %f%%/%f%%\n",
+    printf("L1 miss/hit: %lld/%lld\t hit/miss rate: %f%%/%f%%\n",
            cache_miss_count[0], cache_hit_count[0],
            100.0 * cache_hit_count[0] / (cache_hit_count[0] + cache_miss_count[0]),
            100.0 * cache_miss_count[0] / (cache_miss_count[0] + cache_hit_count[0]));
-    printf("L2 miss/hit: %lld/%lld\t hit rate: %f%%/%f%%\n",
+    printf("L2 miss/hit: %lld/%lld\t hit/miss rate: %f%%/%f%%\n",
            cache_miss_count[1], cache_hit_count[1],
            100.0 * cache_hit_count[1] / (cache_hit_count[1] + cache_miss_count[1]),
            100.0 * cache_miss_count[1] / (cache_miss_count[1] + cache_hit_count[1]));
