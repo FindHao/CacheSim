@@ -13,6 +13,9 @@
 #include <climits>
 
 CacheSim::CacheSim() {}
+/**@arg a_cache_size[] 多级cache的大小设置
+ * @arg a_cache_line_size[] 多级cache的line size（block size）大小
+ * @arg a_mapping_ways[] 组相连的链接方式*/
 void CacheSim::init(_u64 a_cache_size[3], _u64 a_cache_line_size[3], _u64 a_mapping_ways[3]) {
 //如果输入配置不符合要求
     if (a_cache_line_size < 0 || a_mapping_ways[0] < 1 || a_mapping_ways[1] < 1) {
@@ -267,7 +270,7 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
 }
 
 /**从文件读取trace，在我最后的修改目标里，为了适配项目，这里需要改掉*/
-void CacheSim::load_trace(char *filename) {
+void CacheSim::load_trace(const char *filename) {
     char buf[128];
     // 添加自己的input路径
     FILE *fin;

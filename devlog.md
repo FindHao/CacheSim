@@ -71,11 +71,11 @@ line size， ways， 替换算法。
 主要看在这些元素变化的时候，miss率和读写数量的变化。
 ## July 21, 2016 9:03 AM
 
-|变量|固定值|实验结果|Q|
-|-|-|-|-|
-|mapping ways|替换策略 cache_line_size|随着mapping ways的增加，miss率降低，但是降低的幅度逐渐下降|设置更大的mapping ways，查看后面的图像走势|
-|替换策略|mapping_ways cache_line_size|不同替换策略的miss rate差距不大，FIFO 0.245306, LRU 0.238325, RAND0.241427，写数据FIFO最高，LRU和RAND差距非常小，读数据FIFO和RAND差距非常小，LRU最低||
-|cache_line_size|替换策略，mapping_ways|cache_line_size 越大，miss率越低|同Q1什么时候变平缓？|
+| 变量              | 固定值                          | 实验结果                                     | Q                           |
+| --------------- | ---------------------------- | ---------------------------------------- | --------------------------- |
+| mapping ways    | 替换策略 cache_line_size         | 随着mapping ways的增加，miss率降低，但是降低的幅度逐渐下降    | 设置更大的mapping ways，查看后面的图像走势 |
+| 替换策略            | mapping_ways cache_line_size | 不同替换策略的miss rate差距不大，FIFO 0.245306, LRU 0.238325, RAND0.241427，写数据FIFO最高，LRU和RAND差距非常小，读数据FIFO和RAND差距非常小，LRU最低 |                             |
+| cache_line_size | 替换策略，mapping_ways            | cache_line_size 越大，miss率越低               | 同Q1什么时候变平缓？                 |
 
 数据基本符合预期。
 
@@ -154,14 +154,6 @@ Process finished with exit code 0
 ## 星期五, 23. 九月 2016 03:22下午 
 修正L1的脏数据写回问题，修正查找free cache line时，初始最小值为UINT_MAX问题。
 
+## 2017-01-17 23:14:53
 
-
-
-
-
-
-
-
-
-
-
+添加了读取命令行参数的功能，尚未完善。同时准备添加L1 lock 和unlock功能

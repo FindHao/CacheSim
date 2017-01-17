@@ -92,7 +92,7 @@ public:
     /**对一个指令进行分析*/
     void do_cache_op(_u64 addr, char oper_style);
     /**读入trace文件*/
-    void load_trace(char * filename);
+    void load_trace(const char * filename);
 
     /**lock a cache line*/
     int lock_cache_line(_u64 addr, int level);
