@@ -237,6 +237,9 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                 if(hit_index_l2 >= 0){
                     cache_hit_count[1]++;
                     caches[1][hit_index_l2].flag |= CACHE_FLAG_DIRTY;
+                    if(CACHE_SWAP_LRU == swap_style[1]){
+                        caches[1][hit_index_l2].lru_count = tick_count;
+                    }
                 //如果L2miss，那么找到一个新块，将数据写入L2
                 }else{
                      //需要添加cache2 miss count吗？先不加了
