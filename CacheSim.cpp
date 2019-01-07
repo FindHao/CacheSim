@@ -13,26 +13,27 @@
 #include <climits>
 
 CacheSim::CacheSim() {}
+
 /**@arg a_cache_size[] 多级cache的大小设置
  * @arg a_cache_line_size[] 多级cache的line size（block size）大小
  * @arg a_mapping_ways[] 组相连的链接方式*/
 void CacheSim::init(_u64 a_cache_size[3], _u64 a_cache_line_size[3], _u64 a_mapping_ways[3]) {
 //如果输入配置不符合要求
-    if (a_cache_line_size < 0 || a_mapping_ways[0] < 1 || a_mapping_ways[1] < 1) {
+    if (a_cache_line_size[0] < 0 || a_cache_line_size[1] < 0 || a_mapping_ways[0] < 1 || a_mapping_ways[1] < 1) {
         return;
     }
-    cache_size[0] =  a_cache_size[0];
-    cache_size[1] =  a_cache_size[1];
-    cache_line_size[0] =  a_cache_line_size[0];
-    cache_line_size[1] =  a_cache_line_size[1];
+    cache_size[0] = a_cache_size[0];
+    cache_size[1] = a_cache_size[1];
+    cache_line_size[0] = a_cache_line_size[0];
+    cache_line_size[1] = a_cache_line_size[1];
     // 总的line数 = cache总大小/ 每个line的大小（一般64byte，模拟的时候可配置）
     cache_line_num[0] = (_u64) a_cache_size[0] / a_cache_line_size[0];
     cache_line_num[1] = (_u64) a_cache_size[1] / a_cache_line_size[1];
-    cache_line_shifts[0] = (_u64)log2(a_cache_line_size[0]);
-    cache_line_shifts[1] = (_u64)log2(a_cache_line_size[1]);
+    cache_line_shifts[0] = (_u64) log2(a_cache_line_size[0]);
+    cache_line_shifts[1] = (_u64) log2(a_cache_line_size[1]);
     // 几路组相联
-    cache_mapping_ways[0]=  a_mapping_ways[0];
-    cache_mapping_ways[1]=  a_mapping_ways[1];
+    cache_mapping_ways[0] = a_mapping_ways[0];
+    cache_mapping_ways[1] = a_mapping_ways[1];
     // 总共有多少set
     cache_set_size[0] = cache_line_num[0] / cache_mapping_ways[0];
     cache_set_size[1] = cache_line_num[1] / cache_mapping_ways[1];
@@ -45,6 +46,7 @@ void CacheSim::init(_u64 a_cache_size[3], _u64 a_cache_line_size[3], _u64 a_mapp
 
     cache_r_count = 0;
     cache_w_count = 0;
+    cache_w_memory_count = 0;
     // 指令数，主要用来在替换策略的时候提供比较的key，在命中或者miss的时候，相应line会更新自己的count为当时的tick_count;
     tick_count = 0;
 //    cache_buf = (_u8 *) malloc(cache_size);
@@ -62,16 +64,17 @@ void CacheSim::init(_u64 a_cache_size[3], _u64 a_cache_line_size[3], _u64 a_mapp
 }
 
 /**顶部的初始化放在最一开始，如果中途需要对tick_count进行清零和caches的清空，执行此。主要因为tick_count的自增可能会超过unsigned long long，而且一旦tick_count清零，caches里的count数据也就出现了错误。*/
-void CacheSim:: re_init(){
+void CacheSim::re_init() {
     tick_count = 0;
-    memset(cache_hit_count,0,sizeof(cache_hit_count));
-    memset(cache_miss_count,0,sizeof(cache_miss_count));
+    memset(cache_hit_count, 0, sizeof(cache_hit_count));
+    memset(cache_miss_count, 0, sizeof(cache_miss_count));
     cache_free_num[0] = cache_line_num[0];
     cache_free_num[1] = cache_line_num[1];
     memset(caches[0], 0, sizeof(Cache_Line) * cache_line_num[0]);
     memset(caches[1], 0, sizeof(Cache_Line) * cache_line_num[1]);
 //    memset(cache_buf, 0, this->cache_size);
 }
+
 CacheSim::~CacheSim() {
     free(caches[0]);
     free(caches[1]);
@@ -113,13 +116,14 @@ int CacheSim::get_cache_free_line(_u64 set_base, int level) {
         // !!!BUG Fixed
         min_count = ULONG_LONG_MAX;
         for (j = 0; j < cache_mapping_ways[level]; ++j) {
-            if (caches[level][set_base + j].count < min_count && !(caches[level][set_base + j].flag &CACHE_FLAG_LOCK)) {
+            if (caches[level][set_base + j].count < min_count &&
+                !(caches[level][set_base + j].flag & CACHE_FLAG_LOCK)) {
                 min_count = caches[level][set_base + j].count;
                 free_index = j;
             }
         }
     }
-    if(free_index < 0){
+    if (free_index < 0) {
         //如果全部被锁定了，应该会走到这里来。那么强制进行替换。强制替换的时候，需要setline?
         min_count = ULONG_LONG_MAX;
         for (j = 0; j < cache_mapping_ways[level]; ++j) {
@@ -130,15 +134,15 @@ int CacheSim::get_cache_free_line(_u64 set_base, int level) {
         }
     }
     //
-    if(free_index >= 0){
+    if (free_index >= 0) {
         free_index += set_base;
         //如果原有的cache line是脏数据，标记脏位
         if (caches[level][free_index].flag & CACHE_FLAG_DIRTY) {
             // TODO: 写回到L2 cache中。
             caches[level][free_index].flag &= ~CACHE_FLAG_DIRTY;
-            cache_w_count++;
+            cache_w_memory_count++;
         }
-    }else{
+    } else {
         printf("I should not show\n");
     }
     return free_index;
@@ -158,11 +162,11 @@ void CacheSim::set_cache_line(_u64 index, _u64 addr, int level) {
 
 /**不需要分level*/
 void CacheSim::do_cache_op(_u64 addr, char oper_style) {
-    _u64 set_l1, set_l2, set_base_l1,set_base_l2;
+    _u64 set_l1, set_l2, set_base_l1, set_base_l2;
     long long hit_index_l1, hit_index_l2, free_index_l1, free_index_l2;
     tick_count++;
-    if(oper_style == OPERATION_READ) cache_r_count++;
-    if(oper_style == OPERATION_WRITE) cache_w_count++;
+    if (oper_style == OPERATION_READ) cache_r_count++;
+    if (oper_style == OPERATION_WRITE) cache_w_count++;
     set_l2 = (addr >> cache_line_shifts[1]) % cache_set_size[1];
     set_base_l2 = set_l2 * cache_mapping_ways[1];
     hit_index_l2 = check_cache_hit(set_base_l2, addr, 1);
@@ -170,14 +174,14 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
     set_base_l1 = set_l1 * cache_mapping_ways[0];
     hit_index_l1 = check_cache_hit(set_base_l1, addr, 0);
     // lock操作现在只关心L2的。
-    if(oper_style == OPERATION_LOCK || oper_style == OPERATION_UNLOCK){
-        if(hit_index_l2 >= 0){
-            if(oper_style == OPERATION_LOCK){
+    if (oper_style == OPERATION_LOCK || oper_style == OPERATION_UNLOCK) {
+        if (hit_index_l2 >= 0) {
+            if (oper_style == OPERATION_LOCK) {
                 cache_hit_count[1]++;
-                if(CACHE_SWAP_LRU == swap_style[1]){
+                if (CACHE_SWAP_LRU == swap_style[1]) {
                     caches[1][hit_index_l2].lru_count = tick_count;
                 }
-                lock_cache_line((_u64)hit_index_l2, 1);
+                lock_cache_line((_u64) hit_index_l2, 1);
                 // TODO: 不加载到L1上
                 // 如果L1miss，则一定需要加载上去
 //                if( hit_index_l1 < 0 ){
@@ -189,10 +193,10 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
 //                        printf("I should not be here");
 //                    }
 //                }
-            }else{
-                unlock_cache_line((_u64)hit_index_l2, 1);
+            } else {
+                unlock_cache_line((_u64) hit_index_l2, 1);
             }
-        }else {
+        } else {
             // lock miss
             if (oper_style == OPERATION_LOCK) {
                 cache_miss_count[1]++;
@@ -219,7 +223,7 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                 // miss的unlock 先不管
             }
         }
-    }else{
+    } else {
         // L1命中了
         if (hit_index_l1 >= 0) {
             // 一定是read或者write。lock的已经在前面处理过了。
@@ -234,15 +238,15 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                 // 修正上面的问题
 //                caches[0][hit_index_l1].flag |= CACHE_FLAG_DIRTY;
                 // L2命中，则将新数据写入到L2
-                if(hit_index_l2 >= 0){
+                if (hit_index_l2 >= 0) {
                     cache_hit_count[1]++;
                     caches[1][hit_index_l2].flag |= CACHE_FLAG_DIRTY;
-                    if(CACHE_SWAP_LRU == swap_style[1]){
+                    if (CACHE_SWAP_LRU == swap_style[1]) {
                         caches[1][hit_index_l2].lru_count = tick_count;
                     }
-                //如果L2miss，那么找到一个新块，将数据写入L2
-                }else{
-                     //需要添加cache2 miss count吗？先不加了
+                    //如果L2miss，那么找到一个新块，将数据写入L2
+                } else {
+                    //需要添加cache2 miss count吗？先不加了
                     cache_miss_count[1]++;
                     free_index_l2 = get_cache_free_line(set_base_l2, 1);
                     set_cache_line((_u64) free_index_l2, addr, 1);
@@ -252,12 +256,12 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
             // L1 miss
             cache_miss_count[0]++;
             // 先查看L2是否hit，如果hit，直接取数据上来，否则
-            if(hit_index_l2 >= 0 ){
+            if (hit_index_l2 >= 0) {
                 // 在L2中hit, 需要写回到L1中
                 cache_hit_count[1]++;
                 free_index_l1 = get_cache_free_line(set_base_l1, 0);
                 set_cache_line((_u64) free_index_l1, addr, 0);
-            }else{
+            } else {
                 // not in L2,从内存中取
                 cache_miss_count[1]++;
                 free_index_l2 = get_cache_free_line(set_base_l2, 1);
@@ -291,10 +295,16 @@ void CacheSim::load_trace(const char *filename) {
         sscanf(buf, "%c %x", &style, &addr);
         do_cache_op(addr, style);
         switch (style) {
-            case 'l' :rcount++;break;
-            case 's' :wcount++;break;
-            case 'k' :                break;
-            case 'u' :                break;
+            case 'l' :
+                rcount++;
+                break;
+            case 's' :
+                wcount++;
+                break;
+            case 'k' :
+                break;
+            case 'u' :
+                break;
 
         }
     }
@@ -322,7 +332,6 @@ void CacheSim::load_trace(const char *filename) {
     fclose(fin);
 
 }
-
 
 
 int CacheSim::lock_cache_line(_u64 line_index, int level) {

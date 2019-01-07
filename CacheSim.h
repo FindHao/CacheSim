@@ -67,6 +67,8 @@ public:
     int swap_style[MAXLEVEL];
     /**读写内存的计数*/
     _u64 cache_r_count, cache_w_count;
+    /**实际写内存的计数，cache --> memory */
+    _u64 cache_w_memory_count;
     /**cache hit和miss的计数*/
     _u64 cache_hit_count[MAXLEVEL], cache_miss_count[MAXLEVEL];
     /**空闲cache line的index记录，在寻找时，返回空闲line的index*/
