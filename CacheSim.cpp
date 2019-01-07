@@ -250,6 +250,7 @@ void CacheSim::do_cache_op(_u64 addr, char oper_style) {
                     cache_miss_count[1]++;
                     free_index_l2 = get_cache_free_line(set_base_l2, 1);
                     set_cache_line((_u64) free_index_l2, addr, 1);
+                    caches[1][free_index_l2].flag |= CACHE_FLAG_DIRTY;
                 }
             }
         } else {
