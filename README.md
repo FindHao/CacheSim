@@ -12,3 +12,7 @@
 - [x] cache lock功能
 - [ ] 命令行参数
 
+
+# 分支 multipolicies
+
+一级cache，多种替换策略设置。

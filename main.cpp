@@ -2,10 +2,11 @@
 #include <cstring>
 #include "CacheSim.h"
 #include "argparse.hpp"
+
 using namespace std;
 
 
-int main(const int argc, const char * argv[]) {
+int main(const int argc, const char *argv[]) {
 //    char test_case[100] = "";
 //    // 如果没有输入文件，默认是gcc.trace
 //    if(argc > 1){
@@ -38,19 +39,51 @@ int main(const int argc, const char * argv[]) {
     ArgumentParser parser;
     // 输入trace的地址
     parser.addArgument("-i", "--input", 1, false);
-    parser.addArgument("--l1",1, true);
-    parser.addArgument("--l2",1, true);
+    parser.addArgument("--l1", 1, true);
+    parser.addArgument("--l2", 1, true);
     parser.addArgument("--line_size", 1, true);
     parser.addArgument("--ways", 1, true);
     parser.parse(argc, argv);
 
 
-//    int line_size[] = {8, 16, 32, 64, 128};
-    _u64 line_size[] = {32,32 };
-    _u64 ways[] = {4,4};
-    _u64 cache_size[3] = {0x1000,0x8000};
+    _u64 line_size[] = {64};
+//    _u64 ways[] = {8, 12, 16};
+    _u64 ways[] = {32};
+//    int ways[] = {8};
+//    _u64 cache_size[] = {0x200000, 0x400000, 0x800000};
+    _u64 cache_size[] = {0x400000};
+    int i, j, m;
     CacheSim cache;
-    cache.init(cache_size, line_size,ways);
-    cache.load_trace(parser.retrieve<string>("input").c_str());
+    for (m = 0; m < sizeof(cache_size) / sizeof(_u64); m++) {
+        for (i = 0; i < sizeof(line_size) / sizeof(_u64); i++) {
+            for (j = 0; j < sizeof(ways) / sizeof(_u64); j++) {
+//                for (int k = CACHE_SWAP_FIFO; k < CACHE_SWAP_MAX; ++k) {
+                printf("\n=================\ncache_size: %lld Bytes\tline_size: %lld\t mapping ways %lld \t \n",
+                       cache_size[m],
+                       line_size[i],
+                       ways[j]);
+                _u64 temp_cache_size[2], temp_line_size[2], temp_ways[2];
+                temp_cache_size[0] = 0x1000;
+                temp_cache_size[1] = cache_size[m];
+                temp_line_size[0] = 128;
+                temp_line_size[1] = line_size[i];
+                temp_ways[0] = 8;
+                temp_ways[1] = ways[j];
+                cache.init(temp_cache_size, temp_line_size, temp_ways);
+//                    cache.set_swap_style(k);
+                cache.load_trace(parser.retrieve<string>("input").c_str());
+                cache.re_init();
+//                }
+            }
+        }
+    }
+
+////    int line_size[] = {8, 16, 32, 64, 128};
+//    _u64 line_size[] = {64,64 };
+//    _u64 ways[] = {4,4};
+//    _u64 cache_size[3] = {0x1000,0x400000};
+//    CacheSim cache;
+//    cache.init(cache_size, line_size,ways);
+//    cache.load_trace(parser.retrieve<string>("input").c_str());
     return 0;
 }
