@@ -48,19 +48,6 @@ public:
 };
 
 
-class Page {
-public:
-    _u64 tag;
-    _u64 count;
-    _u64 lru_count;
-
-    Page() {
-        this->tag = 0;
-        this->count = 0;
-        this->lru_count = 0;
-    }
-};
-
 
 class CacheSim {
     // 隐患
@@ -108,7 +95,8 @@ public:
     /** DRRIP算法中的single policy selection (PSEL) counter*/
     long long PSEL;
     int cur_win_repalce_policy;
-
+    /** 写miss时，是否直接写到memory */
+    int write_allocation;
     CacheSim();
 
     ~CacheSim();
